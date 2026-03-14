@@ -212,4 +212,22 @@ When a preview link exists:
 - Replace MD5 password hashing with `password_hash()` and `password_verify()`
 - Add email notifications for order and return status changes
 - Add upload support for local PDF previews
+## Screenshots
 
+### Admin Dashboard
+![Admin Dashboard](screenshots/admin-dashboard.png)
+
+### Book List
+![Book List](screenshots/book-list.png)
+
+### Book Details
+![Book Details](screenshots/book-details.png)
+
+### Cart Page
+![Cart Page](screenshots/cart-page.png)
+
+### Issued Books
+![Issued Books](screenshots/issued-books.png)
+
+### User Account Options
+![User Account](screenshots/user%20account%20option.png)

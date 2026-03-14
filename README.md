@@ -1,233 +1,265 @@
 # Online Library Management System
 
-This is a PHP + MySQL library management project upgraded to work better with modern local development on Windows and PHP 8+.
+A **PHP + MySQL based web application** that allows users to browse books, request book issues, manage orders, and process returns through an admin dashboard.
 
-It now supports:
-- Book issue requests
-- Return requests
-- Cart and checkout
-- Demo payment flow
-- User order history
-- Admin order management
-- Book preview links
-- PHP 8+ PDO MySQL compatibility
+This project has been updated to run smoothly with **modern PHP 8+ environments on Windows** using PDO for MySQL connectivity.
 
-## Project Structure
+---
 
-- App root: `library/`
-- Database dump: `library/library.sql`
-- User entry page: `library/index.php`
-- Admin entry page: `library/adminlogin.php`
-
-## Requirements
-
-- PHP 8.0 or newer
-- MySQL 8+ or MariaDB
-- `pdo_mysql` enabled in PHP
-- Web browser
-
-## PHP Configuration
-
-Make sure `pdo_mysql` is enabled in `php.ini`.
-
-Example:
-
-```ini
-extension_dir = "ext"
-extension=pdo_mysql
-```
-
-Then restart PHP or restart the built-in server.
-
-## Database Setup
-
-### Fresh install
-
-1. Create a database named `library`
-2. Import `library/library.sql`
-
-Example:
-
-```powershell
-mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS library;"
-cmd /c "mysql -u root -p library < C:\path\to\library\library.sql"
-```
-
-### If you already imported an older copy of the project
-
-Run these upgrades on the existing database:
-
-```sql
-ALTER TABLE tblbooks
-ADD COLUMN PreviewLink VARCHAR(500) DEFAULT NULL AFTER bookQty;
-
-ALTER TABLE tblissuedbookdetails
-ADD COLUMN ReturnRequestStatus TINYINT(1) NOT NULL DEFAULT 0 AFTER fine,
-ADD COLUMN ReturnRequestDate TIMESTAMP NULL DEFAULT NULL AFTER ReturnRequestStatus,
-ADD COLUMN ReturnProcessedDate TIMESTAMP NULL DEFAULT NULL AFTER ReturnRequestDate;
-
-ALTER TABLE tblorders
-ADD COLUMN StatusNote MEDIUMTEXT DEFAULT NULL AFTER OrderStatus;
-```
-
-## Database Config Files
-
-Update database credentials in:
-
-- `library/includes/config.php`
-- `library/admin/includes/config.php`
-
-## Run Locally
-
-Open PowerShell:
-
-```powershell
-cd "C:\Users\srava\Downloads\Online-Library-Management-System-PHP\Online-Library-Management-System-PHP\library"
-php -S localhost:8000
-```
-
-Then open:
-
-- User site: `http://localhost:8000/`
-- Admin login: `http://localhost:8000/adminlogin.php`
-
-## Default Login Details
-
-### User
-
-- Email: `test@gmail.com`
-- Password: `Test@123`
-
-### Admin
-
-- Username: `admin`
-- Password: `Test@123`
-
-## Main Features
+# Features
 
 ### User Features
 
-- Sign in and manage profile
-- Browse listed books
-- Open book details
-- Add books to cart
-- Buy books through demo checkout
-- View order history
-- Cancel eligible orders
-- See refund pending status after cancellation
-- Request book issue
-- View issue request history
-- View issued books
-- Request return for issued books
-- Open preview links for books when available
+* User registration and login
+* Browse available books
+* View book details
+* Add books to cart
+* Checkout with demo payment flow
+* View order history
+* Cancel eligible orders
+* View issued books
+* Request book issue
+* Request book return
+* View issue request history
+* Preview books using preview links
+
+---
 
 ### Admin Features
 
-- Manage categories
-- Manage authors
-- Add and edit books
-- Add preview links for books
-- Manage registered students
-- Activate or block students
-- Delete students when no issued-book or order history exists
-- Issue books manually
-- Manage issued books
-- Process return requests and fines
-- Manage book issue requests
-- Manage orders
-- Update order status to:
-  - `Placed`
-  - `Packed`
-  - `In Transit`
-  - `Out For Delivery`
-  - `Delivered`
-  - `Cancelled`
-- Update payment status to:
-  - `Paid`
-  - `Refund Pending`
-  - `Refunded`
+* Admin authentication
+* Manage categories
+* Manage authors
+* Add and edit books
+* Add preview links for books
+* Manage registered students
+* Activate or block students
+* Delete students when no issued book or order history exists
+* Issue books manually
+* Manage issued books
+* Process return requests and fines
+* Manage book issue requests
+* Manage orders
+* Update order status:
 
-## Book Preview Links
+  * Placed
+  * Packed
+  * In Transit
+  * Out For Delivery
+  * Delivered
+  * Cancelled
+* Update payment status:
 
-Admin can add a preview link from the book form.
+  * Paid
+  * Refund Pending
+  * Refunded
 
-Supported use cases:
-- Google Drive file share links
-- Direct preview/document links
+---
 
-Example Google Drive link:
+# Project Structure
 
-```text
-https://drive.google.com/file/d/FILE_ID/view?usp=sharing
+```
+online-library-management-system
+│
+├── library/                 Application source code
+│   ├── admin/
+│   ├── includes/
+│   ├── css/
+│   ├── js/
+│   ├── index.php
+│   └── adminlogin.php
+│
+├── database/
+│   └── library.sql          Database dump file
+│
+└── README.md
+```
+
+---
+
+# Requirements
+
+* PHP **8.0 or newer**
+* MySQL **8+** or MariaDB
+* PHP extension **pdo_mysql**
+* Web browser
+
+---
+
+# PHP Configuration
+
+Ensure the **pdo_mysql** extension is enabled in `php.ini`.
+
+Example configuration:
+
+```
+extension_dir="ext"
+extension=pdo_mysql
+```
+
+Restart PHP or restart the PHP built-in server after making changes.
+
+---
+
+# Database Setup
+
+### Step 1 — Create Database
+
+```
+CREATE DATABASE library;
+```
+
+### Step 2 — Import Database
+
+Example command:
+
+```
+mysql -u root -p library < database/library.sql
+```
+
+---
+
+# Database Configuration
+
+Update database credentials in the following files:
+
+```
+library/includes/config.php
+library/admin/includes/config.php
+```
+
+Example configuration:
+
+```php
+$host="localhost";
+$dbname="library";
+$username="root";
+$password="";
+```
+
+---
+
+# Run Project Locally
+
+Open PowerShell or Command Prompt:
+
+```
+cd C:\Users\srava\Downloads\Online-Library-Management-System-PHP\Online-Library-Management-System-PHP\library
+php -S localhost:8000
+```
+
+Then open the application in your browser.
+
+User Panel:
+
+```
+http://localhost:8000/
+```
+
+Admin Login:
+
+```
+http://localhost:8000/adminlogin.php
+```
+
+---
+
+# Demo Login Credentials
+
+### Admin
+
+```
+Username: admin
+Password: Test@123
+```
+
+### User
+
+```
+Email: test@gmail.com
+Password: Test@123
+```
+
+⚠ These credentials are for **demo purposes only**.
+
+---
+
+# Book Preview Feature
+
+Admins can attach preview links to books.
+
+Supported links:
+
+* Google Drive preview links
+* Direct document preview links
+
+Example:
+
+```
+https://drive.google.com/file/d/FILE_ID/view
 ```
 
 When a preview link exists:
-- Users see `Preview Book` on the book list
-- Users see `Preview Book` on the book details page
-- The app opens an embedded preview page
 
-## Order Flow
+* Users can click **Preview Book** from the book list
+* Users can preview from the book details page
+* The preview opens in an embedded viewer
 
-### User side
+---
 
-1. Add a book to cart
+# Order Workflow
+
+### User
+
+1. Add books to cart
 2. Checkout with demo payment
-3. View order in `My Orders`
-4. Cancel while the order is still in `Placed` or `Packed`
-5. See message: `Your money will be refunded shortly.`
+3. View orders in **My Orders**
+4. Cancel orders while status is **Placed** or **Packed**
+5. Cancelled orders show **Refund Pending**
 
-### Admin side
+---
 
-1. Open `Manage Orders`
-2. Select an order
-3. Update order status and payment status
-4. Add a note such as `Packed and ready for dispatch`
+### Admin
 
-## Return Flow
+1. Open **Manage Orders**
+2. Update order status
+3. Update payment status
+4. Add order notes if required
 
-### User side
+---
 
-1. Open `Issued Books`
-2. Click `Request Return`
-3. Status becomes `Return Requested`
+# Return Workflow
 
-### Admin side
+### User
 
-1. Open `Manage Issued Books`
-2. Open the issued-book record
-3. Enter fine if needed
-4. Click `Return Book`
-5. Status becomes returned
+1. Open **Issued Books**
+2. Click **Request Return**
+3. Status becomes **Return Requested**
 
-## Important Notes
+---
 
-- Payment gateway is currently a demo flow, not a real online payment integration
-- Order cancellation marks payment as `Refund Pending`
-- Preview button only appears when a preview link is added
-- Book stock is now calculated using issued copies and sold copies
+### Admin
 
-## Recommended Next Improvements
+1. Open **Manage Issued Books**
+2. View issued book details
+3. Enter fine if required
+4. Click **Return Book**
+
+---
+
+# Important Notes
+
+* Payment flow is **demo only**
+* No real payment gateway integration
+* Order cancellation marks payment as **Refund Pending**
+* Book stock is calculated using issued and sold copies
+
+---
+
+# Future Improvements
 
 - Replace demo payment with Razorpay or Stripe
 - Replace MD5 password hashing with `password_hash()` and `password_verify()`
 - Add email notifications for order and return status changes
 - Add upload support for local PDF previews
-## Screenshots
 
-### Admin Dashboard
-![Admin Dashboard](screenshots/admin-dashboard.png)
-
-### Book List
-![Book List](screenshots/book-list.png)
-
-### Book Details
-![Book Details](screenshots/book-details.png)
-
-### Cart Page
-![Cart Page](screenshots/cart-page.png)
-
-### Issued Books
-![Issued Books](screenshots/issued-books.png)
-
-### User Account Options
-![User Account](screenshots/user%20account%20option.png)

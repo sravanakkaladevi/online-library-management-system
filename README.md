@@ -2,13 +2,24 @@
 
 A **PHP + MySQL based web application** that allows users to browse books, request book issues, manage orders, and process returns through an admin dashboard.
 
-This project has been updated to run smoothly with **modern PHP 8+ environments on Windows** using PDO for MySQL connectivity.
+This project has been updated to run smoothly with **modern PHP 8+ environments** using **PDO for MySQL connectivity**.
+
+---
+
+# Tech Stack
+
+* PHP 8+
+* MySQL / MariaDB
+* HTML5
+* CSS3
+* JavaScript
+* Bootstrap
 
 ---
 
 # Features
 
-### User Features
+## User Features
 
 * User registration and login
 * Browse available books
@@ -25,7 +36,7 @@ This project has been updated to run smoothly with **modern PHP 8+ environments 
 
 ---
 
-### Admin Features
+## Admin Features
 
 * Admin authentication
 * Manage categories
@@ -40,19 +51,25 @@ This project has been updated to run smoothly with **modern PHP 8+ environments 
 * Process return requests and fines
 * Manage book issue requests
 * Manage orders
-* Update order status:
 
-  * Placed
-  * Packed
-  * In Transit
-  * Out For Delivery
-  * Delivered
-  * Cancelled
-* Update payment status:
+### Order Status Management
 
-  * Paid
-  * Refund Pending
-  * Refunded
+Admin can update order status to:
+
+* Placed
+* Packed
+* In Transit
+* Out For Delivery
+* Delivered
+* Cancelled
+
+### Payment Status Management
+
+Admin can update payment status to:
+
+* Paid
+* Refund Pending
+* Refunded
 
 ---
 
@@ -71,6 +88,8 @@ online-library-management-system
 │
 ├── database/
 │   └── library.sql          Database dump file
+│
+├── screenshots/             Project UI screenshots
 │
 └── README.md
 ```
@@ -103,13 +122,13 @@ Restart PHP or restart the PHP built-in server after making changes.
 
 # Database Setup
 
-### Step 1 — Create Database
+## Step 1 — Create Database
 
 ```
 CREATE DATABASE library;
 ```
 
-### Step 2 — Import Database
+## Step 2 — Import Database
 
 Example command:
 
@@ -141,14 +160,14 @@ $password="";
 
 # Run Project Locally
 
-Open PowerShell or Command Prompt:
+Open **PowerShell** or **Command Prompt**:
 
 ```
 cd C:\Users\srava\Downloads\Online-Library-Management-System-PHP\Online-Library-Management-System-PHP\library
 php -S localhost:8000
 ```
 
-Then open the application in your browser.
+Then open in browser.
 
 User Panel:
 
@@ -188,7 +207,7 @@ Password: Test@123
 
 Admins can attach preview links to books.
 
-Supported links:
+Supported preview links:
 
 * Google Drive preview links
 * Direct document preview links
@@ -201,15 +220,15 @@ https://drive.google.com/file/d/FILE_ID/view
 
 When a preview link exists:
 
-* Users can click **Preview Book** from the book list
-* Users can preview from the book details page
-* The preview opens in an embedded viewer
+* Users see **Preview Book** on the book list
+* Users see **Preview Book** on the book details page
+* The book opens in an embedded preview viewer
 
 ---
 
 # Order Workflow
 
-### User
+## User
 
 1. Add books to cart
 2. Checkout with demo payment
@@ -219,7 +238,7 @@ When a preview link exists:
 
 ---
 
-### Admin
+## Admin
 
 1. Open **Manage Orders**
 2. Update order status
@@ -230,7 +249,7 @@ When a preview link exists:
 
 # Return Workflow
 
-### User
+## User
 
 1. Open **Issued Books**
 2. Click **Request Return**
@@ -238,7 +257,7 @@ When a preview link exists:
 
 ---
 
-### Admin
+## Admin
 
 1. Open **Manage Issued Books**
 2. View issued book details
@@ -247,34 +266,49 @@ When a preview link exists:
 
 ---
 
+# Screenshots
+
+### Admin Dashboard
+
+![Admin Dashboard](screenshots/admin-dashboard.png)
+
+### Book List
+
+![Book List](screenshots/book-list.png)
+
+### Book Details
+
+![Book Details](screenshots/book-details.png)
+
+### Cart Page
+
+![Cart Page](screenshots/cart-page.png)
+
+### Issued Books
+
+![Issued Books](screenshots/issued-books.png)
+
+---
+
 # Important Notes
 
-* Payment flow is **demo only**
+* Payment system is currently **demo only**
 * No real payment gateway integration
 * Order cancellation marks payment as **Refund Pending**
-* Book stock is calculated using issued and sold copies
+* Book stock is calculated using issued copies and sold copies
 
 ---
 
 # Future Improvements
 
-- Replace demo payment with Razorpay or Stripe
-- Replace MD5 password hashing with `password_hash()` and `password_verify()`
-- Add email notifications for order and return status changes
-- Add upload support for local PDF previews
-## Screenshots
+* Integrate real payment gateway (Razorpay / Stripe)
+* Replace MD5 hashing with `password_hash()` and `password_verify()`
+* Add email notifications for order updates
+* Add PDF preview upload support
+* Improve UI with modern frontend frameworks
 
-### Admin Dashboard
-![Admin Dashboard](screenshots/admin-dashboard.png)
+---
 
-### Book List
-![Book List](screenshots/book-list.png)
+# License
 
-### Book Details
-![Book Details](screenshots/book-details.png)
-
-### Cart Page
-![Cart Page](screenshots/cart-page.png)
-
-### Issued Books
-![Issued Books](screenshots/issued-books.png)
+This project is intended for **educational and learning purposes**.

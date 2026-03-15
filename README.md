@@ -4,7 +4,7 @@ A **PHP + MySQL based web application** that allows users to browse books, reque
 
 This project has been updated to run smoothly with **modern PHP 8+ environments** using **PDO for MySQL connectivity**.
 
----
+----
 
 # Tech Stack
 

@@ -26,6 +26,21 @@ $_SESSION['error']=$cancelResult['message'];
 header('location:my-orders.php');
 exit;
 }
+
+if(isset($_POST['confirm_received']))
+{
+$orderid=intval($_POST['orderid']);
+$confirmResult=confirmDeliveredOrderForStudent($dbh, $orderid, $sid);
+if($confirmResult['success'])
+{
+$_SESSION['msg']=$confirmResult['message'];
+}
+else {
+$_SESSION['error']=$confirmResult['message'];
+}
+header('location:my-orders.php');
+exit;
+}
 ?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -40,6 +55,69 @@ exit;
     <link href="assets/js/dataTables/dataTables.bootstrap.css" rel="stylesheet" />
     <link href="assets/css/style.css" rel="stylesheet" />
     <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
+    <style type="text/css">
+        .order-history-panel {
+            border: 1px solid #dfe7f0;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+        }
+
+        .order-history-panel .panel-heading {
+            background: linear-gradient(135deg, #eff8ff 0%, #f8fbff 100%);
+            border-bottom: 1px solid #d8e5f2;
+            font-size: 18px;
+            font-weight: 700;
+            color: #1f3b57;
+        }
+
+        .table-order-status {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: #eef4ff;
+            color: #27548a;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .uiverse-btn {
+            position: relative;
+            overflow: hidden;
+            border: 0;
+            border-radius: 999px;
+            padding: 8px 14px;
+            font-weight: 700;
+            transition: transform 0.18s ease, box-shadow 0.18s ease;
+            box-shadow: 0 12px 24px rgba(33, 37, 41, 0.12);
+        }
+
+        .uiverse-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .uiverse-btn--primary {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: #fff;
+        }
+
+        .uiverse-btn--danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: #fff;
+        }
+
+        .uiverse-btn--success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #fff;
+            animation: pulseGlow 1.8s ease-in-out infinite;
+        }
+
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.28); }
+            70% { box-shadow: 0 0 0 14px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+    </style>
 </head>
 <body>
 <?php include('includes/header.php');?>
@@ -79,7 +157,7 @@ exit;
 
         <div class="row">
             <div class="col-md-12">
-                <div class="panel panel-default">
+                <div class="panel panel-default order-history-panel">
                     <div class="panel-heading">
                         Order History
                     </div>
@@ -127,18 +205,23 @@ foreach($results as $result)
                                         <td>Rs. <?php echo htmlentities(number_format((float)$result->TotalAmount,2));?></td>
                                         <td><?php echo htmlentities($result->PaymentProvider . ' / ' . formatPaymentStatusLabel($result->PaymentStatus));?></td>
                                         <td>
-                                            <?php echo htmlentities(formatOrderStatusLabel($result->OrderStatus));?>
+                                            <span class="table-order-status"><?php echo htmlentities(formatOrderStatusLabel($result->OrderStatus));?></span>
 <?php if(trim((string)$result->StatusNote)!==''){ ?>
                                             <br /><small><?php echo htmlentities($result->StatusNote);?></small>
 <?php } ?>
                                         </td>
                                         <td><?php echo htmlentities($result->CreatedDate);?></td>
                                         <td>
-                                            <a href="order-details.php?orderid=<?php echo htmlentities($result->id);?>" class="btn btn-primary btn-xs">View Details</a>
+                                            <a href="order-details.php?orderid=<?php echo htmlentities($result->id);?>" class="btn btn-xs uiverse-btn uiverse-btn--primary">View Details</a>
 <?php if(canUserCancelOrder($result->OrderStatus)){ ?>
+                                                <form method="post" style="display:inline-block; margin-left:6px;">
+                                                <input type="hidden" name="orderid" value="<?php echo htmlentities($result->id);?>">
+                                                <button type="submit" name="cancel_order" class="btn btn-xs uiverse-btn uiverse-btn--danger" onclick="return confirm('Cancel this order? Your money will be refunded shortly.');">Cancel Order</button>
+                                            </form>
+<?php } elseif(canUserConfirmDeliveredOrder($result->OrderStatus)) { ?>
                                             <form method="post" style="display:inline-block; margin-left:6px;">
                                                 <input type="hidden" name="orderid" value="<?php echo htmlentities($result->id);?>">
-                                                <button type="submit" name="cancel_order" class="btn btn-danger btn-xs" onclick="return confirm('Cancel this order? Your money will be refunded shortly.');">Cancel Order</button>
+                                                <button type="submit" name="confirm_received" class="btn btn-xs uiverse-btn uiverse-btn--success" onclick="return confirm('Confirm that you received this order? This will mark it completed for admin too.');">Confirm Received</button>
                                             </form>
 <?php } ?>
                                         </td>

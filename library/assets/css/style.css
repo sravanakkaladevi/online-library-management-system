@@ -47,30 +47,28 @@ body {
    NAVBAR & MENU STYLES
  ============================================================ */
 
-.right-div {
-    float: right; 
-    padding: 20px;
-}
 .logout-btn {
     display: flex;
     align-items: center;
-    justify-content: flex-start;
-    width: 45px;
-    height: 45px;
+    justify-content: center;
+    gap: 8px;
+    width: 92px;
+    height: 40px;
     border: none;
-    border-radius: 50%;
+    border-radius: 999px;
     cursor: pointer;
     position: relative;
     overflow: hidden;
-    transition-duration: .3s;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
     box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.199);
     background-color: rgb(255, 65, 65);
     text-decoration: none !important;
+    padding: 0 !important;
+    text-transform: none !important;
+    white-space: nowrap;
 }
 
 .logout-btn__sign {
-    width: 100%;
-    transition-duration: .3s;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -85,48 +83,55 @@ body {
 }
 
 .logout-btn__text {
-    position: absolute;
-    right: 0;
-    width: 0;
-    opacity: 0;
     color: white;
-    font-size: 1.2em;
-    font-weight: 600;
-    transition-duration: .3s;
+    font-size: 15px;
+    font-weight: 700;
     white-space: nowrap;
 }
 
 .logout-btn:hover {
-    width: 125px;
-    border-radius: 40px;
-    transition-duration: .3s;
-}
-
-.logout-btn:hover .logout-btn__sign {
-    width: 30%;
-    transition-duration: .3s;
-    padding-left: 20px;
-}
-
-.logout-btn:hover .logout-btn__text {
-    opacity: 1;
-    width: 70%;
-    transition-duration: .3s;
-    padding-right: 10px;
+    background-color: rgb(235, 56, 56);
+    box-shadow: 0 10px 22px rgba(255, 65, 65, 0.28);
 }
 
 .logout-btn:active {
-    transform: translate(2px, 2px);
+    transform: translateY(1px);
+}
+
+#menu-top > li.menu-top-logout-item {
+    margin-left: auto;
+    padding-left: 12px;
+    flex-shrink: 0;
+}
+
+#menu-top > li > a.logout-btn:before {
+    display: none;
+}
+
+#menu-top > li > a.logout-btn {
+    color: #fff !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#menu-top > li > a.logout-btn:hover,
+#menu-top > li > a.logout-btn:focus {
+    color: #fff;
+    background: rgb(255, 65, 65);
+    transform: none;
 }
 
 #menu-top {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
     justify-content: flex-start;
     gap: 2px;
     margin: 10px 0 0;
-    overflow: visible;
+    overflow-x: visible;
+    overflow-y: visible;
+    width: 100%;
 }
 
 #menu-top > li {
@@ -143,9 +148,9 @@ body {
     color: #16324f;
     text-decoration: none;
     font-weight: 700;
-    font-size: 15px;
+    font-size: 12px;
     line-height: 1.2;
-    padding: 11px 14px;
+    padding: 10px 8px;
     text-transform: uppercase;
     border-radius: 3px;
     transition: color 0.18s ease, transform 0.18s ease;
@@ -367,19 +372,27 @@ border: 1px solid black;
         flex-wrap: nowrap;
     }
 
-    #menu-top > li > a {
-        margin-bottom: 0;
-        font-size: 14px;
-        padding: 10px 12px;
+    #menu-top > li.menu-top-logout-item {
+        margin-left: 12px;
+        padding-left: 0;
     }
 
-    .right-div {
-        float: none;
-        padding-top: 0;
+    #menu-top > li > a {
+        margin-bottom: 0;
+        font-size: 12px;
+        padding: 10px 8px;
     }
 
     .logout-btn {
-        margin-top: 10px;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        gap: 0;
+        margin-top: 0;
+    }
+
+    .logout-btn__text {
+        display: none;
     }
 }
 

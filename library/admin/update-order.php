@@ -214,7 +214,7 @@ $items=$itemQuery->fetchAll(PDO::FETCH_OBJ);
                         <p><strong>Note:</strong> <?php echo htmlentities($order['StatusNote']);?></p>
 <?php } ?>
                         <div class="alert alert-info" style="margin-top:15px;">
-                            Suggested flow: Placed -> Packed -> In Transit -> Out For Delivery -> Delivered.
+                            Suggested flow: Placed -> Packed -> In Transit -> Out For Delivery -> Delivered -> Completed.
                             If cancelled, set payment to Refund Pending or Refunded.
                         </div>
                     </div>

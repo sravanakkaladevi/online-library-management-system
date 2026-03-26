@@ -26,7 +26,6 @@ else{?>
     <link href="assets/css/style.css" rel="stylesheet" />
     <!-- GOOGLE FONT -->
     <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
-
 </head>
 <body>
       <!------MENU SECTION START-->
@@ -41,7 +40,7 @@ else{?>
                             </div>
 
         </div>
-             
+
              <div class="row">
 <a href="manage-books.php">
  <div class="col-md-3 col-sm-3 col-xs-6">

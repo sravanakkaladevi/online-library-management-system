@@ -46,16 +46,28 @@ body {
    NAVBAR & MENU STYLES
  ============================================================ */
 
-.right-div {
-    float: right; 
-    padding: 20px;
+#menu-top {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    width: 100%;
+    overflow-x: visible;
+    overflow-y: visible;
 }
+
+#menu-top > li {
+    float: none;
+    flex: 0 0 auto;
+}
+
 #menu-top a {
     color:#000;
     text-decoration:none;
     font-weight:500;
-    padding: 25px 15px 25px 15px;
+    padding: 18px 8px;
     text-transform:uppercase;
+    white-space: nowrap;
+    font-size: 12px;
 
 }
 .menu-section {
@@ -83,6 +95,97 @@ border-color: rgba(155, 153, 153, 0.23);
 .navbar-toggle {
 background-color: black;
 border: 1px solid black;
+}
+
+.logout-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 92px;
+    height: 40px;
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.199);
+    background-color: rgb(255, 65, 65);
+    text-decoration: none !important;
+    padding: 0 !important;
+    text-transform: none !important;
+}
+
+.logout-btn__sign {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logout-btn__sign svg {
+    width: 17px;
+}
+
+.logout-btn__sign svg path {
+    fill: white;
+}
+
+.logout-btn__text {
+    color: white;
+    font-size: 15px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.logout-btn:hover {
+    background-color: rgb(235, 56, 56);
+    box-shadow: 0 10px 22px rgba(255, 65, 65, 0.28);
+}
+
+.logout-btn:active {
+    transform: translateY(1px);
+}
+
+#menu-top > li.menu-top-logout-item {
+    margin-left: auto;
+    padding-left: 12px;
+    flex-shrink: 0;
+}
+
+#menu-top > li.menu-top-logout-item > a {
+    padding: 0 !important;
+}
+
+#menu-top > li > a.logout-btn {
+    color: #fff !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(255, 65, 65);
+}
+
+#menu-top > li > a.logout-btn:hover,
+#menu-top > li > a.logout-btn:focus {
+    color: #fff !important;
+    background-color: rgb(235, 56, 56);
+}
+
+@media (max-width: 767px) {
+    #menu-top {
+        overflow-x: auto;
+    }
+
+    .logout-btn {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        gap: 0;
+    }
+
+    .logout-btn__text {
+        display: none;
+    }
 }
 
     /* =============================================================

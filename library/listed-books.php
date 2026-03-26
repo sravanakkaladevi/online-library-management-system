@@ -148,6 +148,15 @@ $books=fetchCatalogBooks($dbh, $catalogFilters, $sid);
             margin-bottom: 0;
         }
 
+        .book-actions .cart-action-form {
+            margin-bottom: 10px;
+        }
+
+        .book-actions .cart-link-btn {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
         .catalog-toolbar,
         .recommendation-panel {
             border: 1px solid #ddd;
@@ -191,6 +200,132 @@ $books=fetchCatalogBooks($dbh, $catalogFilters, $sid);
             margin-bottom: 20px;
         }
 
+        .recommended-slide-chatbot {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            z-index: 1040;
+        }
+
+        .recommended-slide-chatbot__toggle {
+            border: 0;
+            border-radius: 999px;
+            padding: 12px 18px;
+            background: #337ab7;
+            color: #fff;
+            font-weight: 600;
+            box-shadow: 0 12px 32px rgba(51, 122, 183, 0.28);
+        }
+
+        .recommended-slide-chatbot__panel {
+            position: absolute;
+            right: 0;
+            bottom: 58px;
+            width: 380px;
+            max-width: calc(100vw - 30px);
+            background: #fff;
+            border: 1px solid #d9edf7;
+            border-radius: 16px;
+            box-shadow: 0 18px 45px rgba(0, 0, 0, 0.18);
+            overflow: hidden;
+            transform: translateY(18px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        .recommended-slide-chatbot--open .recommended-slide-chatbot__panel {
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .recommended-slide-chatbot__header {
+            padding: 16px 18px;
+            background: linear-gradient(135deg, #eaf6ff 0%, #f8fcff 100%);
+            border-bottom: 1px solid #d9edf7;
+        }
+
+        .recommended-slide-chatbot__header h4 {
+            margin: 0 0 6px;
+        }
+
+        .recommended-slide-chatbot__header p {
+            margin: 0;
+            color: #5f6f7f;
+        }
+
+        .recommended-slide-chatbot__close {
+            position: absolute;
+            top: 12px;
+            right: 14px;
+            border: 0;
+            background: transparent;
+            color: #5f6f7f;
+            font-size: 24px;
+            line-height: 1;
+            padding: 0;
+        }
+
+        .recommended-slide-chatbot__body {
+            padding: 18px;
+        }
+
+        .recommended-slide-chatbot__body textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .recommended-slide-chatbot__quick {
+            margin-bottom: 14px;
+        }
+
+        .recommended-slide-chatbot__quick .btn {
+            margin: 0 8px 8px 0;
+        }
+
+        .inline-chatbot-status {
+            margin-top: 15px;
+            padding: 12px 14px;
+            border-radius: 4px;
+            background: #ffffff;
+            border: 1px solid #d9edf7;
+            color: #31708f;
+        }
+
+        .inline-chatbot-status.is-error {
+            border-color: #ebccd1;
+            background: #fff7f7;
+            color: #a94442;
+        }
+
+        .inline-chatbot-results {
+            margin-top: 20px;
+            max-height: 320px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .inline-chatbot-results .recommended-card {
+            background: #fff;
+        }
+
+        .inline-chatbot-match {
+            display: inline-block;
+            margin-bottom: 10px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: #337ab7;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .inline-chatbot-reason {
+            color: #555;
+            font-size: 13px;
+        }
+
         @media (max-width: 991px) {
             .book-grid-row {
                 display: block;
@@ -198,6 +333,18 @@ $books=fetchCatalogBooks($dbh, $catalogFilters, $sid);
 
             .book-card-col {
                 display: block;
+            }
+
+            .recommended-slide-chatbot {
+                right: 12px;
+                left: 12px;
+                bottom: 12px;
+            }
+
+            .recommended-slide-chatbot__panel {
+                width: auto;
+                max-width: none;
+                left: 0;
             }
         }
     </style>
@@ -273,6 +420,7 @@ $books=fetchCatalogBooks($dbh, $catalogFilters, $sid);
 <?php } ?>
             </div>
         </div>
+
 <?php } ?>
 
         <div class="catalog-toolbar">
@@ -446,11 +594,22 @@ $hasPreview=hasBookPreview($result['PreviewLink']);
                 <button type="button" class="btn btn-default btn-block" disabled>Preview Not Added</button>
 <?php } ?>
 <?php if($canAddToCart){ ?>
-                <form method="post" action="cart.php" style="margin:0;">
+                <form method="post" action="cart.php" class="cart-action-form cart-action-form-block">
                     <input type="hidden" name="bookid" value="<?php echo htmlentities($bookId);?>">
                     <input type="hidden" name="quantity" value="1">
-                    <button type="submit" name="add_to_cart" class="btn btn-success btn-block">Add to Cart</button>
+                    <button type="submit" name="add_to_cart" class="cart-action-btn cart-action-btn--success" data-tooltip="Price Rs. <?php echo htmlentities(number_format((float)$result['BookPrice'],2));?>">
+                        <span class="cart-action-btn__tooltip">Price Rs. <?php echo htmlentities(number_format((float)$result['BookPrice'],2));?></span>
+                        <span class="cart-action-btn__content">
+                            <span class="cart-action-btn__label">Add to Cart</span>
+                            <span class="cart-action-btn__icon" aria-hidden="true">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+                                    <path d="M0 2.5A.5.5 0 0 1 .5 2H2a.5.5 0 0 1 .485.379L2.89 4H14.5a.5.5 0 0 1 .485.621l-1.5 6A.5.5 0 0 1 13 11H4a.5.5 0 0 1-.485-.379L1.61 3H.5a.5.5 0 0 1-.5-.5zM3.14 5l1.25 5h8.22l1.25-5H3.14zM5 13a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm-2 1a2 2 0 1 1 4 0 2 2 0 0 1-4 0zm9-1a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm-2 1a2 2 0 1 1 4 0 2 2 0 0 1-4 0z"></path>
+                                </svg>
+                            </span>
+                        </span>
+                    </button>
                 </form>
+                <a href="cart.php" class="cart-link-btn">Check Cart</a>
 <?php } else { ?>
                 <button type="button" class="btn btn-default btn-block" disabled><?php echo $availableQty>0 ? 'Cart Limit Reached' : 'Unavailable'; ?></button>
 <?php } ?>
@@ -494,9 +653,215 @@ if((($index + 1) % 3 === 0) || ($index + 1 === $totalBooks))
         </div>
     </div>
     </div>
+<?php if(!$isRecommendedView){ include('includes/book-chatbot.php'); } ?>
 <?php include('includes/footer.php');?>
     <script src="assets/js/jquery-1.10.2.js"></script>
     <script src="assets/js/bootstrap.js"></script>
     <script src="assets/js/custom.js"></script>
+<?php if($isRecommendedView){ ?>
+    <div class="recommended-slide-chatbot" id="recommendedSlideChatbot">
+        <button type="button" class="recommended-slide-chatbot__toggle" id="recommendedSlideChatbotToggle">Recommendation Chatbot</button>
+        <div class="recommended-slide-chatbot__panel" id="recommendedSlideChatbotPanel" aria-hidden="true">
+            <div class="recommended-slide-chatbot__header">
+                <button type="button" class="recommended-slide-chatbot__close" id="recommendedSlideChatbotClose" aria-label="Close chatbot">&times;</button>
+                <h4>Slide Recommendation Bot</h4>
+                <p>Open the chatbot and it will automatically show related books for a topic like algorithm.</p>
+            </div>
+            <div class="recommended-slide-chatbot__body">
+                <div class="recommended-slide-chatbot__quick">
+                    <button type="button" class="btn btn-default btn-sm recommended-topic-btn" data-topic="algorithm">Algorithm</button>
+                    <button type="button" class="btn btn-default btn-sm recommended-topic-btn" data-topic="database">Database</button>
+                    <button type="button" class="btn btn-default btn-sm recommended-topic-btn" data-topic="history">History</button>
+                    <button type="button" class="btn btn-default btn-sm recommended-topic-btn" data-topic="finance">Finance</button>
+                </div>
+                <form id="recommendedChatbotForm">
+                    <div class="form-group">
+                        <label for="recommendedChatbotContent">Paste book content</label>
+                        <textarea id="recommendedChatbotContent" name="content" class="form-control" placeholder="Paste a few lines from the book you are reading, or use a quick topic like algorithm."></textarea>
+                    </div>
+                    <div class="text-right">
+                        <button type="button" class="btn btn-default" id="recommendedChatbotPaste">Paste</button>
+                        <button type="submit" class="btn btn-primary">Find Similar Books</button>
+                    </div>
+                </form>
+                <div class="inline-chatbot-status" id="recommendedChatbotStatus">Open the chatbot to auto-load related books for algorithm, or paste your own content.</div>
+                <div class="inline-chatbot-results" id="recommendedChatbotResults"></div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+    (function () {
+        var widget=document.getElementById('recommendedSlideChatbot');
+        var toggle=document.getElementById('recommendedSlideChatbotToggle');
+        var panel=document.getElementById('recommendedSlideChatbotPanel');
+        var closeBtn=document.getElementById('recommendedSlideChatbotClose');
+        var form=document.getElementById('recommendedChatbotForm');
+        var textarea=document.getElementById('recommendedChatbotContent');
+        var pasteBtn=document.getElementById('recommendedChatbotPaste');
+        var statusBox=document.getElementById('recommendedChatbotStatus');
+        var resultsBox=document.getElementById('recommendedChatbotResults');
+        var topicButtons=document.getElementsByClassName('recommended-topic-btn');
+        var hasAutoLoaded=false;
+        var defaultTopicText='Algorithms and data structures help solve problems efficiently through step by step logic, sorting, searching, graphs, trees, recursion, and computational thinking used in programming and computer science.';
+
+        if(!widget || !toggle || !panel || !closeBtn || !form || !textarea || !pasteBtn || !statusBox || !resultsBox){
+            return;
+        }
+
+        function setOpenState(isOpen) {
+            if(isOpen){
+                widget.className='recommended-slide-chatbot recommended-slide-chatbot--open';
+                panel.setAttribute('aria-hidden', 'false');
+            } else {
+                widget.className='recommended-slide-chatbot';
+                panel.setAttribute('aria-hidden', 'true');
+            }
+        }
+
+        function setStatus(message, isError) {
+            statusBox.className=isError ? 'inline-chatbot-status is-error' : 'inline-chatbot-status';
+            if(typeof statusBox.textContent!=='undefined'){
+                statusBox.textContent=message;
+            } else {
+                statusBox.innerText=message;
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value).replace(/[&<>"']/g, function (char) {
+                return {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;'
+                }[char];
+            });
+        }
+
+        function renderResults(books) {
+            var html='';
+            var i=0;
+            var book=null;
+
+            if(!books || !books.length){
+                resultsBox.innerHTML='';
+                return;
+            }
+
+            html='<div class="row">';
+            for(i=0;i<books.length;i++){
+                book=books[i];
+                html+='<div class="col-md-4 col-sm-6">';
+                html+='<div class="recommended-card">';
+                html+='<span class="inline-chatbot-match">'+escapeHtml(book.smartMatchPercent)+'% smart match</span>';
+                html+='<h5>'+escapeHtml(book.title)+'</h5>';
+                html+='<p><strong>Author:</strong> '+escapeHtml(book.author)+'</p>';
+                html+='<p><strong>Category:</strong> '+escapeHtml(book.category)+'</p>';
+                html+='<p><strong>Available:</strong> '+escapeHtml(book.availableQty)+'</p>';
+                html+='<p><strong>Rating:</strong> '+escapeHtml(Number(book.averageRating).toFixed(1))+' / 5 ('+escapeHtml(book.reviewCount)+' reviews)</p>';
+                html+='<p class="inline-chatbot-reason"><strong>Why matched:</strong> '+escapeHtml(book.matchReason || 'Recommended for you')+'</p>';
+                html+='<a class="btn btn-info btn-sm" href="'+escapeHtml(book.detailsUrl)+'">Open Details</a>';
+                html+='</div>';
+                html+='</div>';
+            }
+            html+='</div>';
+            resultsBox.innerHTML=html;
+        }
+
+        function loadRecommendations(content, autoOpen) {
+            var xhr=null;
+
+            if(autoOpen){
+                setOpenState(true);
+            }
+
+            textarea.value=content;
+            resultsBox.innerHTML='';
+
+            if(content.replace(/^\s+|\s+$/g, '').length<25){
+                setStatus('Paste at least a few sentences so the chatbot can detect the topic and category.', true);
+                return false;
+            }
+
+            setStatus('Checking your text and finding similar books...', false);
+
+            xhr=new XMLHttpRequest();
+            xhr.open('POST', 'chatbot-recommend.php', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+            xhr.onreadystatechange=function () {
+                var response=null;
+
+                if(xhr.readyState!==4){
+                    return;
+                }
+
+                try {
+                    response=JSON.parse(xhr.responseText);
+                } catch (error) {
+                    response=null;
+                }
+
+                if(xhr.status!==200 || !response){
+                    setStatus('Recommendations could not be loaded right now. Please try again.', true);
+                    return;
+                }
+
+                setStatus(response.message || 'Recommendations loaded.', !response.success);
+                renderResults(response.books || []);
+            };
+            xhr.send('content='+encodeURIComponent(content));
+            return true;
+        }
+
+        toggle.onclick=function () {
+            var isClosed=panel.getAttribute('aria-hidden')!=='false';
+
+            setOpenState(isClosed);
+            if(isClosed && !hasAutoLoaded){
+                hasAutoLoaded=true;
+                loadRecommendations(defaultTopicText, false);
+            }
+        };
+
+        closeBtn.onclick=function () {
+            setOpenState(false);
+        };
+
+        pasteBtn.onclick=function () {
+            if(navigator.clipboard && navigator.clipboard.readText){
+                navigator.clipboard.readText().then(function (text) {
+                    if(text){
+                        textarea.value=text;
+                        setStatus('Clipboard text pasted. Click "Find Similar Books" to get recommendations.', false);
+                    } else {
+                        setStatus('Clipboard is empty. Copy a line from a book first.', true);
+                    }
+                }).catch(function () {
+                    setStatus('Clipboard access was blocked. Paste the text manually into the box.', true);
+                });
+            } else {
+                setStatus('Clipboard paste is not supported here. Paste the text manually into the box.', true);
+            }
+        };
+
+        for(var index=0; index<topicButtons.length; index++){
+            topicButtons[index].onclick=function () {
+                var topic=this.getAttribute('data-topic') || 'algorithm';
+                var content='This reader is interested in ' + topic + ' books, concepts, examples, theory, problem solving, and practical learning from the same topic area.';
+                loadRecommendations(content, true);
+            };
+        }
+
+        form.onsubmit=function (event) {
+            var content=textarea.value.replace(/^\s+|\s+$/g, '');
+
+            event.preventDefault();
+            loadRecommendations(content, true);
+            return false;
+        };
+    })();
+    </script>
+<?php } ?>
 </body>
 </html>

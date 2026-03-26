@@ -113,6 +113,27 @@ $profile[$keyword]+=$count;
 return $profile;
 }
 
+function mergeKeywordProfiles($profiles=array())
+{
+$merged=array();
+foreach($profiles as $profile)
+{
+if(empty($profile) || !is_array($profile))
+{
+continue;
+}
+foreach($profile as $keyword => $count)
+{
+if(!isset($merged[$keyword]))
+{
+$merged[$keyword]=0;
+}
+$merged[$keyword]+=(int)$count;
+}
+}
+return $merged;
+}
+
 function calculateKeywordSimilarityScore($sourceProfile, $targetProfile)
 {
 if(empty($sourceProfile) || empty($targetProfile))
@@ -144,6 +165,118 @@ return 0;
 }
 
 return $dotProduct / (sqrt($sourceMagnitude) * sqrt($targetMagnitude));
+}
+
+function normalizePhraseForMatch($text)
+{
+$text=normalizeReviewText($text);
+if($text==='')
+{
+return '';
+}
+return ' ' . $text . ' ';
+}
+
+function getPhraseKeywordCoverageScore($contentText, $phrase)
+{
+$contentProfile=extractReviewKeywords($contentText);
+$phraseProfile=extractReviewKeywords($phrase);
+if(empty($contentProfile) || empty($phraseProfile))
+{
+return 0.0;
+}
+
+$matchedKeywords=0;
+$totalKeywords=count($phraseProfile);
+foreach($phraseProfile as $keyword => $count)
+{
+if(isset($contentProfile[$keyword]))
+{
+$matchedKeywords++;
+}
+}
+
+if($totalKeywords===0)
+{
+return 0.0;
+}
+
+return $matchedKeywords / $totalKeywords;
+}
+
+function calculateBookEntityRecommendationBoost($contentText, $book)
+{
+$normalizedContent=normalizePhraseForMatch($contentText);
+if($normalizedContent==='')
+{
+return array(
+'score' => 0.0,
+'reason' => '',
+);
+}
+
+$categoryName=isset($book['CategoryName']) ? trim((string)$book['CategoryName']) : '';
+$authorName=isset($book['AuthorName']) ? trim((string)$book['AuthorName']) : '';
+$bookName=isset($book['BookName']) ? trim((string)$book['BookName']) : '';
+
+$score=0.0;
+$reason='';
+
+if($categoryName!=='')
+{
+$normalizedCategory=normalizePhraseForMatch($categoryName);
+$categoryCoverage=getPhraseKeywordCoverageScore($contentText, $categoryName);
+if($normalizedCategory!=='' && strpos($normalizedContent, $normalizedCategory)!==false)
+{
+$score+=0.65;
+$reason='Same category / zone match';
+}
+elseif($categoryCoverage>=0.5)
+{
+$score+=0.35;
+$reason='Close category / zone match';
+}
+}
+
+if($authorName!=='')
+{
+$normalizedAuthor=normalizePhraseForMatch($authorName);
+$authorCoverage=getPhraseKeywordCoverageScore($contentText, $authorName);
+if($normalizedAuthor!=='' && strpos($normalizedContent, $normalizedAuthor)!==false)
+{
+$score+=0.22;
+if($reason==='')
+{
+$reason='Author keyword match';
+}
+}
+elseif($authorCoverage>=0.5)
+{
+$score+=0.12;
+if($reason==='')
+{
+$reason='Partial author keyword match';
+}
+}
+}
+
+if($bookName!=='')
+{
+$titleCoverage=getPhraseKeywordCoverageScore($contentText, $bookName);
+if($titleCoverage>=0.5)
+{
+$score+=0.10;
+if($reason==='')
+{
+$reason='Book title keyword match';
+}
+}
+}
+
+return array(
+'score' => $score,
+'reason' => $reason,
+);
 }
 
 function normalizeBookPreviewLink($previewLink)
@@ -621,6 +754,37 @@ $profiles[$bookId]=buildKeywordProfileFromTexts($texts);
 return $profiles;
 }
 
+function buildBookContentKeywordProfile($book, $reviewProfiles=array())
+{
+$bookId=0;
+if(isset($book['bookid']))
+{
+$bookId=(int)$book['bookid'];
+}
+elseif(isset($book['id']))
+{
+$bookId=(int)$book['id'];
+}
+
+$textParts=array(
+isset($book['BookName']) ? $book['BookName'] : '',
+isset($book['CategoryName']) ? $book['CategoryName'] : '',
+isset($book['AuthorName']) ? $book['AuthorName'] : '',
+isset($book['ISBNNumber']) ? $book['ISBNNumber'] : '',
+);
+
+$profiles=array(
+buildKeywordProfileFromTexts($textParts),
+);
+
+if($bookId>0 && isset($reviewProfiles[$bookId]))
+{
+$profiles[]=$reviewProfiles[$bookId];
+}
+
+return mergeKeywordProfiles($profiles);
+}
+
 function fetchStudentReviewKeywordProfile($dbh, $studentId, $excludeBookId=0)
 {
 ensureBookReviewTable($dbh);
@@ -816,6 +980,117 @@ $books=array_slice($books, 0, $limit);
 return $books;
 }
 
+function fetchContentRecommendations($dbh, $studentId, $contentText, $limit=5, $excludeBookId=0)
+{
+$contentText=trim((string)$contentText);
+$limit=max(1, (int)$limit);
+
+if($contentText==='')
+{
+return array(
+'success' => false,
+'message' => 'Paste a short paragraph from a book to get recommendations.',
+'books' => array(),
+);
+}
+
+if(strlen($contentText)<25)
+{
+return array(
+'success' => false,
+'message' => 'Paste at least a few sentences so the chatbot can understand the topic.',
+'books' => array(),
+);
+}
+
+$sourceProfile=buildKeywordProfileFromTexts(array($contentText));
+if(empty($sourceProfile))
+{
+return array(
+'success' => false,
+'message' => 'The pasted text did not contain enough useful keywords to compare.',
+'books' => array(),
+);
+}
+
+$books=fetchCatalogBooks(
+$dbh,
+array(
+'sort' => 'recommended',
+'availability' => 'available',
+),
+$studentId,
+$excludeBookId
+);
+
+if(empty($books))
+{
+return array(
+'success' => true,
+'message' => 'No books are available to compare right now.',
+'books' => array(),
+);
+}
+
+$bookIds=array();
+foreach($books as $book)
+{
+$bookIds[]=(int)$book['bookid'];
+}
+$reviewProfiles=fetchBookReviewKeywordProfiles($dbh, $bookIds);
+$scoredBooks=array();
+
+foreach($books as $book)
+{
+$bookProfile=buildBookContentKeywordProfile($book, $reviewProfiles);
+$contentScore=calculateKeywordSimilarityScore($sourceProfile, $bookProfile);
+$entityBoost=calculateBookEntityRecommendationBoost($contentText, $book);
+$baseScore=isset($book['finalRecommendationScore']) ? (float)$book['finalRecommendationScore'] : 0.0;
+$book['contentMatchScore']=$contentScore;
+$book['entityMatchScore']=$entityBoost['score'];
+$book['matchReason']=$entityBoost['reason'];
+$book['chatbotScore']=($contentScore * 100) + ($entityBoost['score'] * 70) + ($baseScore * 0.35);
+if($contentScore>0 || $entityBoost['score']>0)
+{
+$scoredBooks[]=$book;
+}
+}
+
+usort($scoredBooks, function($left, $right) {
+$leftScore=isset($left['chatbotScore']) ? (float)$left['chatbotScore'] : 0.0;
+$rightScore=isset($right['chatbotScore']) ? (float)$right['chatbotScore'] : 0.0;
+if($leftScore===$rightScore)
+{
+return strcmp((string)$left['BookName'], (string)$right['BookName']);
+}
+return ($leftScore < $rightScore) ? 1 : -1;
+});
+
+if(empty($scoredBooks))
+{
+$fallbackBooks=array_slice($books, 0, $limit);
+foreach($fallbackBooks as $index => $book)
+{
+$fallbackBooks[$index]['contentMatchScore']=0.0;
+$fallbackBooks[$index]['entityMatchScore']=0.0;
+$fallbackBooks[$index]['matchReason']='General recommendation';
+$fallbackBooks[$index]['chatbotScore']=isset($book['finalRecommendationScore']) ? (float)$book['finalRecommendationScore'] : 0.0;
+}
+return array(
+'success' => true,
+'message' => 'No close text match was found, so these are the best general recommendations for you.',
+'books' => $fallbackBooks,
+);
+}
+
+$scoredBooks=array_slice($scoredBooks, 0, $limit);
+return array(
+'success' => true,
+'message' => 'Here are books that best match the pasted content.',
+'books' => $scoredBooks,
+);
+}
+
 function hasStudentDeliveredOrderForBook($dbh, $studentId, $bookId)
 {
 $studentId=trim((string)$studentId);
@@ -829,7 +1104,7 @@ $sql="SELECT 1
 FROM tblorderitems
 INNER JOIN tblorders ON tblorders.id=tblorderitems.OrderId
 WHERE tblorders.StudentId=:sid
-AND tblorders.OrderStatus='delivered'
+AND tblorders.OrderStatus IN ('delivered','completed')
 AND tblorderitems.BookId=:bookid
 LIMIT 1";
 $query=$dbh->prepare($sql);
@@ -932,7 +1207,7 @@ return array('success' => false, 'message' => 'Review text is too long. Keep it 
 
 if(!canStudentReviewBook($dbh, $studentId, $bookId))
 {
-return array('success' => false, 'message' => 'You can review this book after you request or issue it, or once your order is delivered.');
+return array('success' => false, 'message' => 'You can review this book after you request or issue it, or once your order is delivered and confirmed.');
 }
 
 $existingReview=fetchStudentBookReview($dbh, $studentId, $bookId);
@@ -995,6 +1270,7 @@ return array(
 'in_transit' => 'In Transit',
 'out_for_delivery' => 'Out For Delivery',
 'delivered' => 'Delivered',
+'completed' => 'Completed',
 'cancelled' => 'Cancelled',
 );
 }
@@ -1031,6 +1307,11 @@ return ucwords(str_replace('_', ' ', (string)$paymentStatus));
 function canUserCancelOrder($orderStatus)
 {
 return in_array((string)$orderStatus, array('placed', 'packed'), true);
+}
+
+function canUserConfirmDeliveredOrder($orderStatus)
+{
+return ((string)$orderStatus==='delivered');
 }
 
 function cancelOrderForStudent($dbh, $orderId, $studentId)
@@ -1074,5 +1355,46 @@ return array(
 'message' => 'Order cancelled successfully. Your money will be refunded shortly.',
 );
 }
+
+function confirmDeliveredOrderForStudent($dbh, $orderId, $studentId)
+{
+$orderSql="SELECT id,OrderNumber,OrderStatus,PaymentStatus
+FROM tblorders
+WHERE id=:orderid AND StudentId=:sid
+LIMIT 1";
+$orderQuery=$dbh->prepare($orderSql);
+$orderQuery->bindParam(':orderid',$orderId,PDO::PARAM_INT);
+$orderQuery->bindParam(':sid',$studentId,PDO::PARAM_STR);
+$orderQuery->execute();
+$order=$orderQuery->fetch(PDO::FETCH_ASSOC);
+
+if(!$order)
+{
+return array('success' => false, 'message' => 'Order not found.');
+}
+
+if(!canUserConfirmDeliveredOrder($order['OrderStatus']))
+{
+return array('success' => false, 'message' => 'This order is not ready for delivery confirmation yet.');
+}
+
+$completedStatus='completed';
+$statusNote='Order received and confirmed by user. Admin follow-up is complete.';
+$updateSql="UPDATE tblorders
+SET OrderStatus=:orderstatus,StatusNote=:statusnote
+WHERE id=:orderid AND StudentId=:sid";
+$updateQuery=$dbh->prepare($updateSql);
+$updateQuery->bindParam(':orderstatus',$completedStatus,PDO::PARAM_STR);
+$updateQuery->bindParam(':statusnote',$statusNote,PDO::PARAM_STR);
+$updateQuery->bindParam(':orderid',$orderId,PDO::PARAM_INT);
+$updateQuery->bindParam(':sid',$studentId,PDO::PARAM_STR);
+$updateQuery->execute();
+
+return array(
+'success' => true,
+'message' => 'Thanks for confirming. Your order is now marked as completed.',
+);
+}
+
 }
 ?>

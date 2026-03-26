@@ -273,8 +273,23 @@ $recommendedBooks=fetchRecommendedBooks($dbh, $sid, 4, $bookid);
                                         <input type="number" name="quantity" min="1" value="1" class="form-control" <?php if(!$canAddToCart){ echo 'disabled'; } ?> />
                                     </div>
 <?php if($canAddToCart){ ?>
-                                    <button type="submit" name="add_to_cart" class="btn btn-success">Add to Cart</button>
+                                    <div class="cart-action-group">
+                                        <button type="submit" name="add_to_cart" class="cart-action-btn cart-action-btn--success" data-tooltip="Price Rs. <?php echo htmlentities(number_format((float)$book['BookPrice'],2));?>">
+                                            <span class="cart-action-btn__tooltip">Price Rs. <?php echo htmlentities(number_format((float)$book['BookPrice'],2));?></span>
+                                            <span class="cart-action-btn__content">
+                                                <span class="cart-action-btn__label">Add to Cart</span>
+                                                <span class="cart-action-btn__icon" aria-hidden="true">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+                                                        <path d="M0 2.5A.5.5 0 0 1 .5 2H2a.5.5 0 0 1 .485.379L2.89 4H14.5a.5.5 0 0 1 .485.621l-1.5 6A.5.5 0 0 1 13 11H4a.5.5 0 0 1-.485-.379L1.61 3H.5a.5.5 0 0 1-.5-.5zM3.14 5l1.25 5h8.22l1.25-5H3.14zM5 13a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm-2 1a2 2 0 1 1 4 0 2 2 0 0 1-4 0zm9-1a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm-2 1a2 2 0 1 1 4 0 2 2 0 0 1-4 0z"></path>
+                                                    </svg>
+                                                </span>
+                                            </span>
+                                        </button>
+                                        <a href="cart.php" class="cart-link-btn">Check Cart</a>
+                                    </div>
+                                    <div style="margin-top:10px;">
                                     <button type="submit" name="buy_now" class="btn btn-warning">Buy Now</button>
+                                    </div>
 <?php } else { ?>
                                     <button type="button" class="btn btn-default" disabled>Add to Cart</button>
                                     <button type="button" class="btn btn-default" disabled>Buy Now</button>
@@ -379,6 +394,7 @@ $recommendedBooks=fetchRecommendedBooks($dbh, $sid, 4, $bookid);
         </div>
     </div>
     </div>
+<?php include('includes/book-chatbot.php');?>
 <?php include('includes/footer.php');?>
     <script src="assets/js/jquery-1.10.2.js"></script>
     <script src="assets/js/bootstrap.js"></script>

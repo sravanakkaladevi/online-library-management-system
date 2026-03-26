@@ -34,6 +34,20 @@ header('location:order-details.php?orderid=' . $orderid);
 exit;
 }
 
+if(isset($_POST['confirm_received']))
+{
+$confirmResult=confirmDeliveredOrderForStudent($dbh, $orderid, $sid);
+if($confirmResult['success'])
+{
+$_SESSION['msg']=$confirmResult['message'];
+}
+else {
+$_SESSION['error']=$confirmResult['message'];
+}
+header('location:order-details.php?orderid=' . $orderid);
+exit;
+}
+
 $orderSql="SELECT id,OrderNumber,TotalAmount,PaymentMethod,PaymentProvider,PaymentStatus,OrderStatus,StatusNote,TransactionId,CreatedDate
 FROM tblorders
 WHERE id=:orderid AND StudentId=:sid
@@ -86,12 +100,52 @@ $items[$index]->studentReview=fetchStudentBookReview($dbh, $sid, $item->BookId);
     <link href="assets/css/style.css" rel="stylesheet" />
     <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
     <style type="text/css">
+        .order-summary-shell {
+            border: 1px solid #dfe7f0;
+            border-radius: 22px;
+            overflow: hidden;
+            box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);
+        }
+
+        .order-summary-shell .panel-heading {
+            background: linear-gradient(135deg, #eff8ff 0%, #f8fbff 100%);
+            border-bottom: 1px solid #d8e5f2;
+            font-size: 18px;
+            font-weight: 700;
+            color: #1f3b57;
+        }
+
+        .status-chip {
+            display: inline-block;
+            padding: 7px 14px;
+            border-radius: 999px;
+            background: #eef4ff;
+            color: #27548a;
+            font-weight: 700;
+        }
+
+        .delivery-confirm-card {
+            border: 1px solid #c9f0df;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #f1fff8 0%, #fcfffd 100%);
+            padding: 20px;
+            margin-top: 18px;
+            box-shadow: 0 18px 40px rgba(16, 185, 129, 0.12);
+            animation: floatCard 2.2s ease-in-out infinite;
+        }
+
+        .delivery-confirm-card h4 {
+            margin-top: 0;
+            font-weight: 700;
+        }
+
         .review-order-card {
             border: 1px solid #eee;
             background: #fafafa;
             padding: 15px;
             margin-bottom: 15px;
             min-height: 210px;
+            border-radius: 16px;
         }
 
         .recommendation-item {
@@ -100,11 +154,54 @@ $items[$index]->studentReview=fetchStudentBookReview($dbh, $sid, $item->BookId);
             padding: 15px;
             margin-bottom: 15px;
             min-height: 180px;
+            border-radius: 16px;
         }
 
         .recommendation-item h5,
         .review-order-card h5 {
             margin-top: 0;
+        }
+
+        .uiverse-btn {
+            position: relative;
+            overflow: hidden;
+            border: 0;
+            border-radius: 999px;
+            padding: 11px 18px;
+            font-weight: 700;
+            transition: transform 0.18s ease, box-shadow 0.18s ease;
+            box-shadow: 0 12px 24px rgba(33, 37, 41, 0.12);
+        }
+
+        .uiverse-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .uiverse-btn--primary {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: #fff;
+        }
+
+        .uiverse-btn--danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: #fff;
+        }
+
+        .uiverse-btn--success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #fff;
+            animation: pulseGlow 1.8s ease-in-out infinite;
+        }
+
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.28); }
+            70% { box-shadow: 0 0 0 14px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        @keyframes floatCard {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
         }
     </style>
 </head>
@@ -146,7 +243,7 @@ $items[$index]->studentReview=fetchStudentBookReview($dbh, $sid, $item->BookId);
 
         <div class="row">
             <div class="col-md-12">
-                <div class="panel panel-info">
+                <div class="panel panel-info order-summary-shell">
                     <div class="panel-heading">
                         Order Summary
                     </div>
@@ -161,8 +258,8 @@ $items[$index]->studentReview=fetchStudentBookReview($dbh, $sid, $item->BookId);
                                 <p><strong>Payment Provider:</strong> <?php echo htmlentities($order['PaymentProvider']);?></p>
                             </div>
                             <div class="col-md-4">
-                                <p><strong>Payment Status:</strong> <?php echo htmlentities(formatPaymentStatusLabel($order['PaymentStatus']));?></p>
-                                <p><strong>Order Status:</strong> <?php echo htmlentities(formatOrderStatusLabel($order['OrderStatus']));?></p>
+                                <p><strong>Payment Status:</strong> <span class="status-chip"><?php echo htmlentities(formatPaymentStatusLabel($order['PaymentStatus']));?></span></p>
+                                <p><strong>Order Status:</strong> <span class="status-chip"><?php echo htmlentities(formatOrderStatusLabel($order['OrderStatus']));?></span></p>
                             </div>
                         </div>
                         <p><strong>Transaction ID:</strong> <?php echo htmlentities($order['TransactionId']);?></p>
@@ -172,8 +269,16 @@ $items[$index]->studentReview=fetchStudentBookReview($dbh, $sid, $item->BookId);
 <?php } ?>
 <?php if(canUserCancelOrder($order['OrderStatus'])){ ?>
                         <form method="post" style="margin-top:15px;">
-                            <button type="submit" name="cancel_order" class="btn btn-danger" onclick="return confirm('Cancel this order? Your money will be refunded shortly.');">Cancel Order</button>
+                            <button type="submit" name="cancel_order" class="btn uiverse-btn uiverse-btn--danger" onclick="return confirm('Cancel this order? Your money will be refunded shortly.');">Cancel Order</button>
                         </form>
+<?php } elseif(canUserConfirmDeliveredOrder($order['OrderStatus'])) { ?>
+                        <div class="delivery-confirm-card">
+                            <h4>Order Delivered?</h4>
+                            <p>If you already received the package, confirm it here. The order will be marked completed automatically for admin.</p>
+                            <form method="post" style="margin-top:10px;">
+                                <button type="submit" name="confirm_received" class="btn uiverse-btn uiverse-btn--success" onclick="return confirm('Confirm that you received this order? This will mark it completed for admin too.');">Yes, I Received It</button>
+                            </form>
+                        </div>
 <?php } elseif($order['OrderStatus']==='cancelled' && $order['PaymentStatus']==='refund_pending') { ?>
                         <div class="alert alert-warning" style="margin-top:15px;">
                             Your order is cancelled. Your money will be refunded shortly.
@@ -231,7 +336,7 @@ $cnt=$cnt+1;
             </div>
         </div>
 
-<?php if($order['OrderStatus']==='delivered'){ ?>
+<?php if(in_array($order['OrderStatus'], array('delivered','completed'), true)){ ?>
         <div class="row">
             <div class="col-md-12">
                 <div class="panel panel-success">
@@ -250,10 +355,10 @@ $cnt=$cnt+1;
 <?php if(!empty($item->studentReview)){ ?>
                                     <p><strong>Your Rating:</strong> <?php echo htmlentities($item->studentReview['Rating']);?> / 5</p>
                                     <p><?php echo nl2br(htmlentities(getDisplayValue($item->studentReview['ReviewText'], 'No review text added.')));?></p>
-                                    <a href="book-details.php?bookid=<?php echo htmlentities($item->BookId);?>" class="btn btn-primary btn-sm">Update Review</a>
+                                    <a href="book-details.php?bookid=<?php echo htmlentities($item->BookId);?>" class="btn uiverse-btn uiverse-btn--primary btn-sm">Update Review</a>
 <?php } elseif($item->canReview) { ?>
                                     <p>Your review is now available for this delivered book.</p>
-                                    <a href="book-details.php?bookid=<?php echo htmlentities($item->BookId);?>" class="btn btn-success btn-sm">Write Review</a>
+                                    <a href="book-details.php?bookid=<?php echo htmlentities($item->BookId);?>" class="btn uiverse-btn uiverse-btn--success btn-sm">Write Review</a>
 <?php } else { ?>
                                     <div class="alert alert-info" style="margin-bottom:0;">Review will appear after delivery is fully confirmed.</div>
 <?php } ?>
@@ -284,7 +389,7 @@ $cnt=$cnt+1;
                                     <p><strong>Category:</strong> <?php echo htmlentities(getDisplayValue($recommendedBook['CategoryName'], 'Category not assigned'));?></p>
                                     <p><strong>Available:</strong> <?php echo htmlentities($recommendedBook['availableQty']);?></p>
                                     <p><strong>Rating:</strong> <?php echo htmlentities(number_format((float)$recommendedBook['averageRating'],1));?> / 5</p>
-                                    <a href="book-details.php?bookid=<?php echo htmlentities($recommendedBook['bookid']);?>" class="btn btn-info btn-sm">Open Details</a>
+                                    <a href="book-details.php?bookid=<?php echo htmlentities($recommendedBook['bookid']);?>" class="btn uiverse-btn uiverse-btn--primary btn-sm">Open Details</a>
                                 </div>
                             </div>
 <?php } ?>

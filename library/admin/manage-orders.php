@@ -89,7 +89,7 @@ SELECT OrderId,SUM(Quantity) AS totalItems
 FROM tblorderitems
 GROUP BY OrderId
 ) order_items ON order_items.OrderId=tblorders.id
-ORDER BY FIELD(tblorders.PaymentStatus,'refund_pending','paid','refunded'), FIELD(tblorders.OrderStatus,'placed','packed','in_transit','out_for_delivery','delivered','cancelled'), tblorders.id DESC";
+ORDER BY FIELD(tblorders.PaymentStatus,'refund_pending','paid','refunded'), FIELD(tblorders.OrderStatus,'placed','packed','in_transit','out_for_delivery','delivered','completed','cancelled'), tblorders.id DESC";
 $query=$dbh->prepare($sql);
 $query->execute();
 $results=$query->fetchAll(PDO::FETCH_OBJ);

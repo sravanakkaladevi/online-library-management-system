@@ -256,6 +256,19 @@ CREATE TABLE `tblstudents` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 --
+-- Table structure for table `tbluserpreferences`
+--
+
+CREATE TABLE `tbluserpreferences` (
+  `id` int(11) NOT NULL,
+  `StudentId` varchar(100) NOT NULL,
+  `ThemeColor` varchar(7) DEFAULT '#2563eb',
+  `ProfileImage` varchar(255) DEFAULT NULL,
+  `CreatedAt` timestamp NULL DEFAULT current_timestamp(),
+  `UpdatedAt` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
 -- Dumping data for table `tblstudents`
 --
 
@@ -341,6 +354,13 @@ ALTER TABLE `tblstudents`
   ADD UNIQUE KEY `StudentId` (`StudentId`);
 
 --
+-- Indexes for table `tbluserpreferences`
+--
+ALTER TABLE `tbluserpreferences`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uniq_student_pref` (`StudentId`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -403,6 +423,12 @@ ALTER TABLE `tblorderitems`
 --
 ALTER TABLE `tblstudents`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+
+--
+-- AUTO_INCREMENT for table `tbluserpreferences`
+--
+ALTER TABLE `tbluserpreferences`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

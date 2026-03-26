@@ -137,6 +137,37 @@ INSERT INTO `tblbooks` VALUES (1,'PHP And MySql programming',5,1,'222333',20.00,
 UNLOCK TABLES;
 
 --
+-- Table structure for table `tblbookreviews`
+--
+
+DROP TABLE IF EXISTS `tblbookreviews`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `tblbookreviews` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `BookId` int NOT NULL,
+  `StudentId` varchar(100) NOT NULL,
+  `Rating` tinyint NOT NULL,
+  `ReviewText` mediumtext,
+  `CreatedDate` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `UpdatedDate` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_book_review_student` (`BookId`,`StudentId`),
+  KEY `idx_book_reviews_book` (`BookId`),
+  KEY `idx_book_reviews_student` (`StudentId`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `tblbookreviews`
+--
+
+LOCK TABLES `tblbookreviews` WRITE;
+/*!40000 ALTER TABLE `tblbookreviews` DISABLE KEYS */;
+/*!40000 ALTER TABLE `tblbookreviews` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `tblcart`
 --
 

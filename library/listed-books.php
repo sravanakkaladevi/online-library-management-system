@@ -69,6 +69,11 @@ exit;
 $pendingRequestBookIds=fetchStudentPendingRequestBookIds($dbh, $sid);
 $activeIssuedBookIds=fetchStudentIssuedBookIds($dbh, $sid);
 $cartBookQuantities=fetchStudentCartQuantities($dbh, $sid);
+$catalogFilters=getBookCatalogFiltersFromRequest();
+$catalogFilterOptions=fetchCatalogFilterOptions($dbh);
+$isRecommendedView=($catalogFilters['sort']==='recommended');
+$recommendedBooks=fetchRecommendedBooks($dbh, $sid, 3);
+$books=fetchCatalogBooks($dbh, $catalogFilters, $sid);
 ?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -143,6 +148,49 @@ $cartBookQuantities=fetchStudentCartQuantities($dbh, $sid);
             margin-bottom: 0;
         }
 
+        .catalog-toolbar,
+        .recommendation-panel {
+            border: 1px solid #ddd;
+            background: #fff;
+            margin-bottom: 25px;
+            padding: 20px;
+        }
+
+        .catalog-toolbar .form-group,
+        .recommendation-panel .form-group {
+            margin-bottom: 15px;
+        }
+
+        .recommended-badge {
+            display: inline-block;
+            margin-bottom: 8px;
+            padding: 4px 10px;
+            background: #5bc0de;
+            color: #fff;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+        }
+
+        .recommended-card {
+            min-height: 100%;
+            border: 1px solid #e7e7e7;
+            padding: 15px;
+            background: #fafafa;
+            margin-bottom: 15px;
+        }
+
+        .recommended-card h5 {
+            margin-top: 0;
+            min-height: 40px;
+        }
+
+        .results-summary {
+            margin-bottom: 20px;
+        }
+
         @media (max-width: 991px) {
             .book-grid-row {
                 display: block;
@@ -160,10 +208,14 @@ $cartBookQuantities=fetchStudentCartQuantities($dbh, $sid);
          <div class="container">
         <div class="row pad-botm">
             <div class="col-md-8">
-                <h4 class="header-line">Listed Books</h4>
+                <h4 class="header-line"><?php echo $isRecommendedView ? 'Recommended Books' : 'Listed Books'; ?></h4>
             </div>
             <div class="col-md-4 text-right">
+<?php if($isRecommendedView){ ?>
+                <a href="listed-books.php" class="btn btn-default">Browse All Books</a>
+<?php } else { ?>
                 <a href="book-requests.php" class="btn btn-info">View My Requests</a>
+<?php } ?>
             </div>
         </div>
 
@@ -190,23 +242,123 @@ $cartBookQuantities=fetchStudentCartQuantities($dbh, $sid);
         <?php } ?>
         </div>
 
+<?php if($isRecommendedView){ ?>
+        <div class="recommendation-panel">
+            <div class="row">
+                <div class="col-md-8">
+                    <h4 style="margin-top:0;">Recommended For You</h4>
+                    <p style="margin-bottom:0;">Suggestions are ranked using your recent activity, matching author or category interest, popularity, and current availability.</p>
+                </div>
+                <div class="col-md-4 text-right">
+                    <span class="recommended-badge">Smart Picks</span>
+                </div>
+            </div>
+            <div class="row" style="margin-top:15px;">
+<?php if(!empty($recommendedBooks)){ ?>
+<?php foreach($recommendedBooks as $recommendedBook){ ?>
+                <div class="col-md-4 col-sm-6">
+                    <div class="recommended-card">
+                        <h5><?php echo htmlentities(getDisplayValue($recommendedBook['BookName'], 'Untitled Book'));?></h5>
+                        <p><strong>Author:</strong> <?php echo htmlentities(getDisplayValue($recommendedBook['AuthorName'], 'Author not assigned'));?></p>
+                        <p><strong>Category:</strong> <?php echo htmlentities(getDisplayValue($recommendedBook['CategoryName'], 'Category not assigned'));?></p>
+                        <p><strong>Available:</strong> <?php echo htmlentities($recommendedBook['availableQty']);?></p>
+                        <a href="book-details.php?bookid=<?php echo htmlentities($recommendedBook['bookid']);?>" class="btn btn-info btn-sm">View Recommendation</a>
+                    </div>
+                </div>
+<?php } ?>
+<?php } else { ?>
+                <div class="col-md-12">
+                    <div class="alert alert-info" style="margin-bottom:0;">Recommendations will appear here after you browse, request, or purchase a few books.</div>
+                </div>
+<?php } ?>
+            </div>
+        </div>
+<?php } ?>
+
+        <div class="catalog-toolbar">
+            <form method="get">
+                <div class="row">
+                    <div class="col-md-3 col-sm-6">
+                        <div class="form-group">
+                            <label>Search</label>
+                            <input type="text" name="keyword" class="form-control" value="<?php echo htmlentities($catalogFilters['keyword']);?>" placeholder="Title, author, ISBN">
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-sm-6">
+                        <div class="form-group">
+                            <label>Category</label>
+                            <select name="category" class="form-control">
+                                <option value="0">All Categories</option>
+<?php foreach($catalogFilterOptions['categories'] as $categoryOption){ ?>
+                                <option value="<?php echo htmlentities($categoryOption['id']);?>" <?php if((int)$catalogFilters['category']===(int)$categoryOption['id']){ echo 'selected'; } ?>><?php echo htmlentities($categoryOption['CategoryName']);?></option>
+<?php } ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-sm-6">
+                        <div class="form-group">
+                            <label>Author</label>
+                            <select name="author" class="form-control">
+                                <option value="0">All Authors</option>
+<?php foreach($catalogFilterOptions['authors'] as $authorOption){ ?>
+                                <option value="<?php echo htmlentities($authorOption['id']);?>" <?php if((int)$catalogFilters['author']===(int)$authorOption['id']){ echo 'selected'; } ?>><?php echo htmlentities($authorOption['AuthorName']);?></option>
+<?php } ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-sm-6">
+                        <div class="form-group">
+                            <label>Availability</label>
+                            <select name="availability" class="form-control">
+                                <option value="all" <?php if($catalogFilters['availability']==='all'){ echo 'selected'; } ?>>All</option>
+                                <option value="available" <?php if($catalogFilters['availability']==='available'){ echo 'selected'; } ?>>Available</option>
+                                <option value="unavailable" <?php if($catalogFilters['availability']==='unavailable'){ echo 'selected'; } ?>>Unavailable</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-1 col-sm-6">
+                        <div class="form-group">
+                            <label>Preview</label>
+                            <select name="preview" class="form-control">
+                                <option value="all" <?php if($catalogFilters['preview']==='all'){ echo 'selected'; } ?>>All</option>
+                                <option value="yes" <?php if($catalogFilters['preview']==='yes'){ echo 'selected'; } ?>>Yes</option>
+                                <option value="no" <?php if($catalogFilters['preview']==='no'){ echo 'selected'; } ?>>No</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-sm-6">
+                        <div class="form-group">
+                            <label>Sort By</label>
+                            <select name="sort" class="form-control">
+                                <option value="recommended" <?php if($catalogFilters['sort']==='recommended'){ echo 'selected'; } ?>>Recommended</option>
+                                <option value="popular" <?php if($catalogFilters['sort']==='popular'){ echo 'selected'; } ?>>Popular</option>
+                                <option value="latest" <?php if($catalogFilters['sort']==='latest'){ echo 'selected'; } ?>>Latest</option>
+                                <option value="name_asc" <?php if($catalogFilters['sort']==='name_asc'){ echo 'selected'; } ?>>Name A-Z</option>
+                                <option value="price_low" <?php if($catalogFilters['sort']==='price_low'){ echo 'selected'; } ?>>Price Low-High</option>
+                                <option value="price_high" <?php if($catalogFilters['sort']==='price_high'){ echo 'selected'; } ?>>Price High-Low</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 text-right">
+                        <a href="listed-books.php" class="btn btn-default">Reset</a>
+                        <button type="submit" class="btn btn-primary">Apply Filters</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="results-summary">
+            <strong><?php echo htmlentities(count($books));?></strong> <?php echo $isRecommendedView ? 'recommended books found for you.' : 'books found with the selected filters.'; ?>
+        </div>
+
         <div class="row">
 <?php
-$sql = "SELECT tblbooks.BookName,tblcategory.CategoryName,tblauthors.AuthorName,tblbooks.ISBNNumber,
-tblbooks.BookPrice,tblbooks.id as bookid,tblbooks.bookImage,tblbooks.bookQty,tblbooks.PreviewLink," . getInventorySelectSql() . "
-FROM tblbooks
-LEFT JOIN tblauthors ON tblauthors.id=tblbooks.AuthorId
-LEFT JOIN tblcategory ON tblcategory.id=tblbooks.CatId
-" . getInventoryIssueJoinSql('tblbooks') . "
-" . getInventoryOrderJoinSql('tblbooks') . "
-ORDER BY tblbooks.id";
-$query = $dbh->prepare($sql);
-$query->execute();
-$results=$query->fetchAll(PDO::FETCH_OBJ);
-$totalBooks=count($results);
-if($query->rowCount() > 0)
+        $totalBooks=count($books);
+if($totalBooks > 0)
 {
-foreach($results as $index => $result)
+foreach($books as $index => $result)
 {
 if($index % 3 === 0)
 {
@@ -214,41 +366,41 @@ if($index % 3 === 0)
         <div class="row book-grid-row">
 <?php
 }
-$availableQty=calculateAvailableBookQty($result->bookQty, $result->activeIssues, $result->soldQty);
-$bookId=(int)$result->bookid;
+$availableQty=(int)$result['availableQty'];
+$bookId=(int)$result['bookid'];
 $alreadyIssued=isset($activeIssuedBookIds[$bookId]);
 $requestPending=isset($pendingRequestBookIds[$bookId]);
 $cartQty=isset($cartBookQuantities[$bookId]) ? (int)$cartBookQuantities[$bookId] : 0;
 $canAddToCart=$availableQty>$cartQty;
-$hasPreview=hasBookPreview($result->PreviewLink);
+$hasPreview=hasBookPreview($result['PreviewLink']);
 ?>
     <div class="col-md-4 col-sm-6 book-card-col">
         <div class="panel panel-default book-card">
-            <div class="panel-heading"><?php echo htmlentities($result->BookName);?></div>
+            <div class="panel-heading"><?php echo htmlentities(getDisplayValue($result['BookName'], 'Untitled Book'));?></div>
             <div class="book-cover-wrap">
-                <img src="admin/bookimg/<?php echo htmlentities($result->bookImage);?>" class="book-cover" alt="<?php echo htmlentities($result->BookName);?>">
+                <img src="admin/bookimg/<?php echo htmlentities($result['bookImage']);?>" class="book-cover" alt="<?php echo htmlentities(getDisplayValue($result['BookName'], 'Untitled Book'));?>">
             </div>
             <div class="panel-body" style="padding:0;">
                 <table class="table table-bordered">
                     <tr>
                         <th>Author</th>
-                        <td><?php echo htmlentities($result->AuthorName);?></td>
+                        <td><?php echo htmlentities(getDisplayValue($result['AuthorName'], 'Author not assigned'));?></td>
                     </tr>
                     <tr>
                         <th>Category</th>
-                        <td><?php echo htmlentities($result->CategoryName);?></td>
+                        <td><?php echo htmlentities(getDisplayValue($result['CategoryName'], 'Category not assigned'));?></td>
                     </tr>
                     <tr>
                         <th>ISBN Number</th>
-                        <td><?php echo htmlentities($result->ISBNNumber);?></td>
+                        <td><?php echo htmlentities(getDisplayValue($result['ISBNNumber'], 'ISBN not added'));?></td>
                     </tr>
                     <tr>
                         <th>Book Price</th>
-                        <td>Rs. <?php echo htmlentities(number_format((float)$result->BookPrice,2));?></td>
+                        <td>Rs. <?php echo htmlentities(number_format((float)$result['BookPrice'],2));?></td>
                     </tr>
                     <tr>
                         <th>Book Quantity</th>
-                        <td><?php echo htmlentities($result->bookQty);?></td>
+                        <td><?php echo htmlentities($result['bookQty']);?></td>
                     </tr>
                     <tr>
                         <th>Available Quantity</th>
@@ -256,11 +408,11 @@ $hasPreview=hasBookPreview($result->PreviewLink);
                     </tr>
                     <tr>
                         <th>Currently Reading</th>
-                        <td><?php echo htmlentities($result->activeIssues);?> people</td>
+                        <td><?php echo htmlentities($result['activeIssues']);?> people</td>
                     </tr>
                     <tr>
                         <th>Sold Copies</th>
-                        <td><?php echo htmlentities($result->soldQty);?></td>
+                        <td><?php echo htmlentities($result['soldQty']);?></td>
                     </tr>
                     <tr>
                         <th>In Your Cart</th>
@@ -333,7 +485,12 @@ if((($index + 1) % 3 === 0) || ($index + 1 === $totalBooks))
         </div>
 <?php
 }
-}} ?>
+}
+} else { ?>
+            <div class="col-md-12">
+                <div class="alert alert-warning">No books matched your current filters. Try clearing one or two filter options.</div>
+            </div>
+<?php } ?>
         </div>
     </div>
     </div>

@@ -61,6 +61,17 @@ $itemQuery=$dbh->prepare($itemSql);
 $itemQuery->bindParam(':orderid',$orderid,PDO::PARAM_INT);
 $itemQuery->execute();
 $items=$itemQuery->fetchAll(PDO::FETCH_OBJ);
+
+$recommendedBooks=array();
+if($order['OrderStatus']==='delivered')
+{
+$recommendedBooks=fetchRecommendedBooks($dbh, $sid, 4);
+foreach($items as $index => $item)
+{
+$items[$index]->canReview=canStudentReviewBook($dbh, $sid, $item->BookId);
+$items[$index]->studentReview=fetchStudentBookReview($dbh, $sid, $item->BookId);
+}
+}
 ?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -74,6 +85,28 @@ $items=$itemQuery->fetchAll(PDO::FETCH_OBJ);
     <link href="assets/css/font-awesome.css" rel="stylesheet" />
     <link href="assets/css/style.css" rel="stylesheet" />
     <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
+    <style type="text/css">
+        .review-order-card {
+            border: 1px solid #eee;
+            background: #fafafa;
+            padding: 15px;
+            margin-bottom: 15px;
+            min-height: 210px;
+        }
+
+        .recommendation-item {
+            border: 1px solid #eee;
+            background: #fafafa;
+            padding: 15px;
+            margin-bottom: 15px;
+            min-height: 180px;
+        }
+
+        .recommendation-item h5,
+        .review-order-card h5 {
+            margin-top: 0;
+        }
+    </style>
 </head>
 <body>
 <?php include('includes/header.php');?>
@@ -197,6 +230,75 @@ $cnt=$cnt+1;
                 </div>
             </div>
         </div>
+
+<?php if($order['OrderStatus']==='delivered'){ ?>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-success">
+                    <div class="panel-heading">
+                        Review Your Delivered Books
+                    </div>
+                    <div class="panel-body">
+                        <p>These books are now delivered, so the user can submit a review and the system can improve recommendations from that feedback.</p>
+                        <div class="row">
+<?php foreach($items as $item){ ?>
+                            <div class="col-md-4 col-sm-6">
+                                <div class="review-order-card">
+                                    <h5><?php echo htmlentities($item->BookName);?></h5>
+                                    <p><strong>Author:</strong> <?php echo htmlentities($item->AuthorName);?></p>
+                                    <p><strong>Quantity:</strong> <?php echo htmlentities($item->Quantity);?></p>
+<?php if(!empty($item->studentReview)){ ?>
+                                    <p><strong>Your Rating:</strong> <?php echo htmlentities($item->studentReview['Rating']);?> / 5</p>
+                                    <p><?php echo nl2br(htmlentities(getDisplayValue($item->studentReview['ReviewText'], 'No review text added.')));?></p>
+                                    <a href="book-details.php?bookid=<?php echo htmlentities($item->BookId);?>" class="btn btn-primary btn-sm">Update Review</a>
+<?php } elseif($item->canReview) { ?>
+                                    <p>Your review is now available for this delivered book.</p>
+                                    <a href="book-details.php?bookid=<?php echo htmlentities($item->BookId);?>" class="btn btn-success btn-sm">Write Review</a>
+<?php } else { ?>
+                                    <div class="alert alert-info" style="margin-bottom:0;">Review will appear after delivery is fully confirmed.</div>
+<?php } ?>
+                                </div>
+                            </div>
+<?php } ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        Recommended Next Reads
+                    </div>
+                    <div class="panel-body">
+                        <p>Recommendations are based on your activity, ratings, and review text similarity.</p>
+                        <div class="row">
+<?php if(!empty($recommendedBooks)){ ?>
+<?php foreach($recommendedBooks as $recommendedBook){ ?>
+                            <div class="col-md-3 col-sm-6">
+                                <div class="recommendation-item">
+                                    <h5><?php echo htmlentities(getDisplayValue($recommendedBook['BookName'], 'Untitled Book'));?></h5>
+                                    <p><strong>Author:</strong> <?php echo htmlentities(getDisplayValue($recommendedBook['AuthorName'], 'Author not assigned'));?></p>
+                                    <p><strong>Category:</strong> <?php echo htmlentities(getDisplayValue($recommendedBook['CategoryName'], 'Category not assigned'));?></p>
+                                    <p><strong>Available:</strong> <?php echo htmlentities($recommendedBook['availableQty']);?></p>
+                                    <p><strong>Rating:</strong> <?php echo htmlentities(number_format((float)$recommendedBook['averageRating'],1));?> / 5</p>
+                                    <a href="book-details.php?bookid=<?php echo htmlentities($recommendedBook['bookid']);?>" class="btn btn-info btn-sm">Open Details</a>
+                                </div>
+                            </div>
+<?php } ?>
+<?php } else { ?>
+                            <div class="col-md-12">
+                                <div class="alert alert-info" style="margin-bottom:0;">More personalized recommendations will appear after more reading activity and reviews.</div>
+                            </div>
+<?php } ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+<?php } ?>
     </div>
     </div>
 <?php include('includes/footer.php');?>

@@ -24,6 +24,9 @@
     <!-- LOGO HEADER END-->
 <?php
 $cartCount=0;
+$currentPage=basename($_SERVER['PHP_SELF']);
+$currentSort=isset($_GET['sort']) ? trim((string)$_GET['sort']) : '';
+$isRecommendedView=($currentPage==='listed-books.php' && $currentSort==='recommended');
 if(!empty($_SESSION['login']) && !empty($_SESSION['stdid']) && isset($dbh))
 {
 try {
@@ -49,11 +52,12 @@ if($_SESSION['login'])
                 <div class="col-md-12">
                     <div class="navbar-collapse collapse ">
                         <ul id="menu-top" class="nav navbar-nav navbar-right">
-                            <li><a href="dashboard.php" class="menu-top-active">DASHBOARD</a></li>
-                            <li><a href="listed-books.php">Listed Books</a></li>
-                            <li><a href="issued-books.php">Issued Books</a></li>
-                            <li><a href="book-requests.php">Book Requests</a></li>
-                            <li><a href="cart.php">Cart<?php if($cartCount>0){ echo " (".$cartCount.")"; } ?></a></li>
+                            <li><a href="dashboard.php" class="<?php if($currentPage==='dashboard.php'){ echo 'menu-top-active'; } ?>">DASHBOARD</a></li>
+                            <li><a href="listed-books.php" class="<?php if($currentPage==='listed-books.php' && !$isRecommendedView){ echo 'menu-top-active'; } ?>">Listed Books</a></li>
+                            <li><a href="listed-books.php?sort=recommended" class="<?php if($isRecommendedView){ echo 'menu-top-active'; } ?>">Recommended</a></li>
+                            <li><a href="issued-books.php" class="<?php if($currentPage==='issued-books.php'){ echo 'menu-top-active'; } ?>">Issued Books</a></li>
+                            <li><a href="book-requests.php" class="<?php if($currentPage==='book-requests.php'){ echo 'menu-top-active'; } ?>">Book Requests</a></li>
+                            <li><a href="cart.php" class="<?php if($currentPage==='cart.php'){ echo 'menu-top-active'; } ?>">Cart<?php if($cartCount>0){ echo " (".$cartCount.")"; } ?></a></li>
                              <li>
                                 <a href="#" class="dropdown-toggle" id="ddlmenuItem" data-toggle="dropdown"> Account <i class="fa fa-angle-down"></i></a>
                                 <ul class="dropdown-menu" role="menu" aria-labelledby="ddlmenuItem">

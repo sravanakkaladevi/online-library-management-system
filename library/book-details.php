@@ -76,6 +76,22 @@ header('location:book-details.php?bookid=' . $bookid);
 exit;
 }
 
+if(isset($_POST['save_review']))
+{
+$reviewRating=isset($_POST['rating']) ? intval($_POST['rating']) : 0;
+$reviewText=isset($_POST['review_text']) ? trim((string)$_POST['review_text']) : '';
+$reviewResult=saveBookReview($dbh, $sid, $bookid, $reviewRating, $reviewText);
+if($reviewResult['success'])
+{
+$_SESSION['msg']=$reviewResult['message'];
+}
+else {
+$_SESSION['error']=$reviewResult['message'];
+}
+header('location:book-details.php?bookid=' . $bookid);
+exit;
+}
+
 $book=fetchBookWithInventory($dbh, $bookid);
 if(!$book)
 {
@@ -93,6 +109,10 @@ $cartQty=isset($cartBookQuantities[$bookid]) ? (int)$cartBookQuantities[$bookid]
 $canAddToCart=(int)$book['availableQty']>$cartQty;
 $hasPreview=hasBookPreview($book['PreviewLink']);
 $previewOpenUrl=$hasPreview ? getBookPreviewOpenUrl($book['PreviewLink']) : '';
+$canReviewBook=canStudentReviewBook($dbh, $sid, $bookid);
+$studentReview=fetchStudentBookReview($dbh, $sid, $bookid);
+$bookReviews=fetchBookReviews($dbh, $bookid, 8);
+$recommendedBooks=fetchRecommendedBooks($dbh, $sid, 4, $bookid);
 ?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -106,6 +126,49 @@ $previewOpenUrl=$hasPreview ? getBookPreviewOpenUrl($book['PreviewLink']) : '';
     <link href="assets/css/font-awesome.css" rel="stylesheet" />
     <link href="assets/css/style.css" rel="stylesheet" />
     <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
+    <style type="text/css">
+        .recommendation-box {
+            border: 1px solid #ddd;
+            background: #fff;
+            padding: 20px;
+            margin-top: 25px;
+        }
+
+        .recommendation-item {
+            border: 1px solid #eee;
+            background: #fafafa;
+            padding: 15px;
+            margin-bottom: 15px;
+            min-height: 180px;
+        }
+
+        .recommendation-item h5 {
+            margin-top: 0;
+            min-height: 40px;
+        }
+
+        .review-box {
+            border: 1px solid #ddd;
+            background: #fff;
+            padding: 20px;
+            margin-top: 25px;
+        }
+
+        .review-item {
+            border-bottom: 1px solid #eee;
+            padding: 12px 0;
+        }
+
+        .review-item:last-child {
+            border-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .rating-summary {
+            font-size: 16px;
+            font-weight: 600;
+        }
+    </style>
 </head>
 <body>
 <?php include('includes/header.php');?>
@@ -162,14 +225,14 @@ $previewOpenUrl=$hasPreview ? getBookPreviewOpenUrl($book['PreviewLink']) : '';
             <div class="col-md-8">
                 <div class="panel panel-info">
                     <div class="panel-heading">
-                        <?php echo htmlentities($book['BookName']);?>
+                        <?php echo htmlentities(getDisplayValue($book['BookName'], 'Untitled Book'));?>
                     </div>
                     <div class="panel-body">
                         <div class="row">
                             <div class="col-md-6">
-                                <p><strong>Author:</strong> <?php echo htmlentities($book['AuthorName']);?></p>
-                                <p><strong>Category:</strong> <?php echo htmlentities($book['CategoryName']);?></p>
-                                <p><strong>ISBN:</strong> <?php echo htmlentities($book['ISBNNumber']);?></p>
+                                <p><strong>Author:</strong> <?php echo htmlentities(getDisplayValue($book['AuthorName'], 'Author not assigned'));?></p>
+                                <p><strong>Category:</strong> <?php echo htmlentities(getDisplayValue($book['CategoryName'], 'Category not assigned'));?></p>
+                                <p><strong>ISBN:</strong> <?php echo htmlentities(getDisplayValue($book['ISBNNumber'], 'ISBN not added'));?></p>
                                 <p><strong>Price:</strong> Rs. <?php echo htmlentities(number_format((float)$book['BookPrice'],2));?></p>
                             </div>
                             <div class="col-md-6">
@@ -179,6 +242,7 @@ $previewOpenUrl=$hasPreview ? getBookPreviewOpenUrl($book['PreviewLink']) : '';
                                 <p><strong>Sold Copies:</strong> <?php echo htmlentities($book['soldQty']);?></p>
                                 <p><strong>In Your Cart:</strong> <?php echo htmlentities($cartQty);?></p>
                                 <p><strong>Preview:</strong> <?php echo $hasPreview ? 'Available' : 'Not Added'; ?></p>
+                                <p><strong>Rating:</strong> <?php echo htmlentities(number_format((float)$book['averageRating'],1));?> / 5 (<?php echo htmlentities($book['reviewCount']);?> reviews)</p>
                             </div>
                         </div>
                         <hr />
@@ -238,6 +302,79 @@ $previewOpenUrl=$hasPreview ? getBookPreviewOpenUrl($book['PreviewLink']) : '';
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="review-box">
+            <div class="row">
+                <div class="col-md-6">
+                    <h4 style="margin-top:0;">Ratings and Reviews</h4>
+                    <p class="rating-summary"><?php echo htmlentities(number_format((float)$book['averageRating'],1));?> / 5 using <?php echo htmlentities($book['reviewCount']);?> reader reviews</p>
+                    <p style="margin-bottom:0;">Recommendations use a content-based text model: your past review keywords are compared with review text from other books to surface similar reads.</p>
+                </div>
+                <div class="col-md-6">
+<?php if($canReviewBook){ ?>
+                    <form method="post">
+                        <div class="form-group">
+                            <label>Your Rating</label>
+                            <select name="rating" class="form-control" required>
+                                <option value="">Choose rating</option>
+<?php for($ratingOption=5;$ratingOption>=1;$ratingOption--){ ?>
+                                <option value="<?php echo $ratingOption; ?>" <?php if($studentReview && (int)$studentReview['Rating']===$ratingOption){ echo 'selected'; } ?>><?php echo $ratingOption; ?> Star<?php if($ratingOption>1){ echo 's'; } ?></option>
+<?php } ?>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Your Review</label>
+                            <textarea name="review_text" class="form-control" rows="4" maxlength="1500" placeholder="Share what you liked, the topics covered, writing style, or who this book is best for." required><?php echo $studentReview ? htmlentities($studentReview['ReviewText']) : ''; ?></textarea>
+                        </div>
+                        <button type="submit" name="save_review" class="btn btn-primary"><?php echo $studentReview ? 'Update Review' : 'Submit Review'; ?></button>
+                    </form>
+<?php } else { ?>
+                    <div class="alert alert-info" style="margin-bottom:0;">Rate and review becomes available after you request or issue this book, or once your order is delivered.</div>
+<?php } ?>
+                </div>
+            </div>
+            <hr />
+<?php if(!empty($bookReviews)){ ?>
+<?php foreach($bookReviews as $review){ ?>
+            <div class="review-item">
+                <p style="margin-bottom:6px;"><strong><?php echo htmlentities(getDisplayValue($review['FullName'], $review['StudentId']));?></strong> <span style="color:#777;">rated <?php echo htmlentities(renderStarRating($review['Rating']));?> (<?php echo htmlentities($review['Rating']);?>/5)</span></p>
+                <p style="margin-bottom:6px;"><?php echo nl2br(htmlentities(getDisplayValue($review['ReviewText'], 'No review text added.')));?></p>
+                <small style="color:#777;"><?php echo htmlentities($review['CreatedDate']);?></small>
+            </div>
+<?php } ?>
+<?php } else { ?>
+            <div class="alert alert-info" style="margin-bottom:0;">No reviews yet. The first reader review will help power text-based recommendations.</div>
+<?php } ?>
+        </div>
+
+        <div class="recommendation-box">
+            <div class="row">
+                <div class="col-md-12">
+                    <h4 style="margin-top:0;">Recommended Next Reads</h4>
+                    <p>These suggestions are picked from your activity history, reader ratings, popularity, and text similarity from review content.</p>
+                </div>
+            </div>
+            <div class="row">
+<?php if(!empty($recommendedBooks)){ ?>
+<?php foreach($recommendedBooks as $recommendedBook){ ?>
+                <div class="col-md-3 col-sm-6">
+                    <div class="recommendation-item">
+                        <h5><?php echo htmlentities(getDisplayValue($recommendedBook['BookName'], 'Untitled Book'));?></h5>
+                        <p><strong>Author:</strong> <?php echo htmlentities(getDisplayValue($recommendedBook['AuthorName'], 'Author not assigned'));?></p>
+                        <p><strong>Category:</strong> <?php echo htmlentities(getDisplayValue($recommendedBook['CategoryName'], 'Category not assigned'));?></p>
+                        <p><strong>Available:</strong> <?php echo htmlentities($recommendedBook['availableQty']);?></p>
+                        <p><strong>Rating:</strong> <?php echo htmlentities(number_format((float)$recommendedBook['averageRating'],1));?> / 5</p>
+                        <a href="book-details.php?bookid=<?php echo htmlentities($recommendedBook['bookid']);?>" class="btn btn-info btn-sm">Open Details</a>
+                    </div>
+                </div>
+<?php } ?>
+<?php } else { ?>
+                <div class="col-md-12">
+                    <div class="alert alert-info" style="margin-bottom:0;">More personalized recommendations will appear here after you interact with more books.</div>
+                </div>
+<?php } ?>
             </div>
         </div>
     </div>

@@ -23,7 +23,7 @@ $paymentStatusOptions=getPaymentStatusOptions();
 if(isset($_POST['update_order']))
 {
 $orderStatus=isset($_POST['orderstatus']) ? trim($_POST['orderstatus']) : 'placed';
-$paymentStatus=isset($_POST['paymentstatus']) ? trim($_POST['paymentstatus']) : 'paid';
+$paymentStatus=isset($_POST['paymentstatus']) ? trim($_POST['paymentstatus']) : 'pending_confirmation';
 $statusNote=trim($_POST['statusnote']);
 
 if(!isset($orderStatusOptions[$orderStatus]))
@@ -33,12 +33,17 @@ $orderStatus='placed';
 
 if(!isset($paymentStatusOptions[$paymentStatus]))
 {
-$paymentStatus='paid';
+$paymentStatus='pending_confirmation';
 }
 
 if($orderStatus==='cancelled' && $paymentStatus==='paid')
 {
 $paymentStatus='refund_pending';
+}
+
+if($paymentStatus==='payment_rejected' && $statusNote==='')
+{
+$statusNote='Offline counter payment was not approved by admin.';
 }
 
 if($orderStatus==='cancelled' && $statusNote==='')
@@ -56,7 +61,7 @@ $updateQuery->bindParam(':statusnote',$statusNote,PDO::PARAM_STR);
 $updateQuery->bindParam(':orderid',$orderid,PDO::PARAM_INT);
 $updateQuery->execute();
 
-$_SESSION['msg']="Order status updated successfully.";
+$_SESSION['msg']="Order and payment confirmation updated successfully.";
 header('location:update-order.php?orderid=' . $orderid);
 exit;
 }
@@ -176,6 +181,13 @@ $items=$itemQuery->fetchAll(PDO::FETCH_OBJ);
                         Update Status
                     </div>
                     <div class="panel-body">
+<?php if($order['PaymentMethod']==='counter_payment'){ ?>
+                        <div class="alert alert-warning">
+                            Offline counter payment decision:
+                            set <strong>Paid</strong> if approved,
+                            or <strong>Offline Payment Not Approved</strong> if payment was not received or rejected.
+                        </div>
+<?php } ?>
                         <form method="post">
                             <div class="form-group">
                                 <label>Order Status</label>
@@ -215,7 +227,7 @@ $items=$itemQuery->fetchAll(PDO::FETCH_OBJ);
 <?php } ?>
                         <div class="alert alert-info" style="margin-top:15px;">
                             Suggested flow: Placed -> Packed -> In Transit -> Out For Delivery -> Delivered -> Completed.
-                            If cancelled, set payment to Refund Pending or Refunded.
+                            For counter orders, set payment to Paid if approved, or Offline Payment Not Approved if the cash payment was not accepted.
                         </div>
                     </div>
                 </div>

@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>Online Library Management System | Listed Books</title>
+    <link href="assets/css/bootstrap.css" rel="stylesheet" />
+    <link href="assets/css/font-awesome.css" rel="stylesheet" />
+    <link href="assets/css/style.css" rel="stylesheet" />
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
+</head>
+<body>
+<div class="navbar navbar-inverse set-radius-zero" >
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" >
+
+                    <img src="assets/img/logo.png" />
+                </a>
+
+            </div>
+ 
+            <div class="right-div">
+                <a href="logout.php" class="btn btn-danger pull-right">LOG ME OUT</a>
+            </div>
+                    </div>
+    </div>
+    <!-- LOGO HEADER END-->
+    
+<section class="menu-section">
+        <div class="container">
+            <div class="row ">
+                <div class="col-md-12">
+                    <div class="navbar-collapse collapse ">
+                        <ul id="menu-top" class="nav navbar-nav navbar-right">
+                            <li><a href="dashboard.php" class="menu-top-active">DASHBOARD</a></li>
+                            <li><a href="listed-books.php">Listed Books</a></li>
+                            <li><a href="issued-books.php">Issued Books</a></li>
+                            <li><a href="book-requests.php">Book Requests</a></li>
+                            <li><a href="cart.php">Cart</a></li>
+                             <li>
+                                <a href="#" class="dropdown-toggle" id="ddlmenuItem" data-toggle="dropdown"> Account <i class="fa fa-angle-down"></i></a>
+                                <ul class="dropdown-menu" role="menu" aria-labelledby="ddlmenuItem">
+                                    <li role="presentation"><a role="menuitem" tabindex="-1" href="my-profile.php">My Profile</a></li>
+                                    <li role="presentation"><a role="menuitem" tabindex="-1" href="my-orders.php">My Orders</a></li>
+                                     <li role="presentation"><a role="menuitem" tabindex="-1" href="change-password.php">Change Password</a></li>
+                                </ul>
+                            </li>
+
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+        <div class="content-wrapper">
+         <div class="container">
+        <div class="row pad-botm">
+            <div class="col-md-8">
+                <h4 class="header-line">Listed Books</h4>
+            </div>
+            <div class="col-md-4 text-right">
+                <a href="book-requests.php" class="btn btn-info">View My Requests</a>
+            </div>
+        </div>
+
+        <div class="row">
+                        </div>
+
+        <div class="row">
+    <div class="col-md-4" style="min-height:640px;">
+    <table class="table table-bordered">
+     <tr>
+        <td rowspan="2" style="width:130px;"><img src="admin/bookimg/1efecc0ca822e40b7b673c0d79ae943f.jpg" width="120"></td>
+        <th>Book Name</th>
+        <td>PHP And MySql programming</td>
+    </tr>
+    <tr>
+        <th>Author</th>
+        <td>Anuj kumar</td>
+    </tr>
+    <tr>
+        <th>Category</th>
+        <td colspan="2">Technology</td>
+    </tr>
+    <tr>
+        <th>ISBN Number</th>
+        <td colspan="2">222333</td>
+    </tr>
+    <tr>
+        <th>Book Price</th>
+        <td colspan="2">Rs. 20.00</td>
+    </tr>
+    <tr>
+        <th>Book Quantity</th>
+        <td colspan="2">10</td>
+    </tr>
+    <tr>
+        <th>Available Quantity</th>
+        <td colspan="2">7</td>
+    </tr>
+    <tr>
+        <th>Currently Reading</th>
+        <td colspan="2">3 people</td>
+    </tr>
+    <tr>
+        <th>Sold Copies</th>
+        <td colspan="2">0</td>
+    </tr>
+    <tr>
+        <th>In Your Cart</th>
+        <td colspan="2">0</td>
+    </tr>
+    <tr>
+        <th>Issue Status</th>
+        <td colspan="2">
+                <span style="color:green;">Available to request</span>
+                </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+        <a href="book-details.php?bookid=1" class="btn btn-info btn-block">Open Details</a>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+                <form method="post" action="cart.php" style="margin:0;">
+        <input type="hidden" name="bookid" value="1">
+        <input type="hidden" name="quantity" value="1">
+        <button type="submit" name="add_to_cart" class="btn btn-success btn-block">Add to Cart</button>
+        </form>
+                </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+                <form method="post" action="cart.php" style="margin:0;">
+        <input type="hidden" name="bookid" value="1">
+        <input type="hidden" name="quantity" value="1">
+        <button type="submit" name="buy_now" class="btn btn-warning btn-block">Buy Now</button>
+        </form>
+                </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+                <form method="post" style="margin:0;">
+        <input type="hidden" name="bookid" value="1">
+        <button type="submit" name="request_book" class="btn btn-primary btn-block">Request Book Issue</button>
+        </form>
+                </td>
+    </tr>
+</table>
+    </div>
+    <div class="col-md-4" style="min-height:640px;">
+    <table class="table table-bordered">
+     <tr>
+        <td rowspan="2" style="width:130px;"><img src="admin/bookimg/dd8267b57e0e4feee5911cb1e1a03a79.jpg" width="120"></td>
+        <th>Book Name</th>
+        <td>physics</td>
+    </tr>
+    <tr>
+        <th>Author</th>
+        <td>HC Verma</td>
+    </tr>
+    <tr>
+        <th>Category</th>
+        <td colspan="2">Science</td>
+    </tr>
+    <tr>
+        <th>ISBN Number</th>
+        <td colspan="2">1111</td>
+    </tr>
+    <tr>
+        <th>Book Price</th>
+        <td colspan="2">Rs. 15.00</td>
+    </tr>
+    <tr>
+        <th>Book Quantity</th>
+        <td colspan="2">10</td>
+    </tr>
+    <tr>
+        <th>Available Quantity</th>
+        <td colspan="2">9</td>
+    </tr>
+    <tr>
+        <th>Currently Reading</th>
+        <td colspan="2">0 people</td>
+    </tr>
+    <tr>
+        <th>Sold Copies</th>
+        <td colspan="2">1</td>
+    </tr>
+    <tr>
+        <th>In Your Cart</th>
+        <td colspan="2">0</td>
+    </tr>
+    <tr>
+        <th>Issue Status</th>
+        <td colspan="2">
+                <span style="color:green;">Available to request</span>
+                </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+        <a href="book-details.php?bookid=3" class="btn btn-info btn-block">Open Details</a>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+                <form method="post" action="cart.php" style="margin:0;">
+        <input type="hidden" name="bookid" value="3">
+        <input type="hidden" name="quantity" value="1">
+        <button type="submit" name="add_to_cart" class="btn btn-success btn-block">Add to Cart</button>
+        </form>
+                </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+                <form method="post" action="cart.php" style="margin:0;">
+        <input type="hidden" name="bookid" value="3">
+        <input type="hidden" name="quantity" value="1">
+        <button type="submit" name="buy_now" class="btn btn-warning btn-block">Buy Now</button>
+        </form>
+                </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+                <form method="post" style="margin:0;">
+        <input type="hidden" name="bookid" value="3">
+        <button type="submit" name="request_book" class="btn btn-primary btn-block">Request Book Issue</button>
+        </form>
+                </td>
+    </tr>
+</table>
+    </div>
+    <div class="col-md-4" style="min-height:640px;">
+    <table class="table table-bordered">
+     <tr>
+        <td rowspan="2" style="width:130px;"><img src="admin/bookimg/5939d64655b4d2ae443830d73abc35b6.jpg" width="120"></td>
+        <th>Book Name</th>
+        <td>Murach&#039;s MySQL</td>
+    </tr>
+    <tr>
+        <th>Author</th>
+        <td>Anuj kumar</td>
+    </tr>
+    <tr>
+        <th>Category</th>
+        <td colspan="2">Technology</td>
+    </tr>
+    <tr>
+        <th>ISBN Number</th>
+        <td colspan="2">9350237695</td>
+    </tr>
+    <tr>
+        <th>Book Price</th>
+        <td colspan="2">Rs. 455.00</td>
+    </tr>
+    <tr>
+        <th>Book Quantity</th>
+        <td colspan="2">20</td>
+    </tr>
+    <tr>
+        <th>Available Quantity</th>
+        <td colspan="2">20</td>
+    </tr>
+    <tr>
+        <th>Currently Reading</th>
+        <td colspan="2">0 people</td>
+    </tr>
+    <tr>
+        <th>Sold Copies</th>
+        <td colspan="2">0</td>
+    </tr>
+    <tr>
+        <th>In Your Cart</th>
+        <td colspan="2">0</td>
+    </tr>
+    <tr>
+        <th>Issue Status</th>
+        <td colspan="2">
+                <span style="color:green;">Available to request</span>
+                </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+        <a href="book-details.php?bookid=5" class="btn btn-info btn-block">Open Details</a>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+                <form method="post" action="cart.php" style="margin:0;">
+        <input type="hidden" name="bookid" value="5">
+        <input type="hidden" name="quantity" value="1">
+        <button type="submit" name="add_to_cart" class="btn btn-success btn-block">Add to Cart</button>
+        </form>
+                </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+                <form method="post" action="cart.php" style="margin:0;">
+        <input type="hidden" name="bookid" value="5">
+        <input type="hidden" name="quantity" value="1">
+        <button type="submit" name="buy_now" class="btn btn-warning btn-block">Buy Now</button>
+        </form>
+                </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+                <form method="post" style="margin:0;">
+        <input type="hidden" name="bookid" value="5">
+        <button type="submit" name="request_book" class="btn btn-primary btn-block">Request Book Issue</button>
+        </form>
+                </td>
+    </tr>
+</table>
+    </div>
+    <div class="col-md-4" style="min-height:640px;">
+    <table class="table table-bordered">
+     <tr>
+        <td rowspan="2" style="width:130px;"><img src="admin/bookimg/144ab706ba1cb9f6c23fd6ae9c0502b3.jpg" width="120"></td>
+        <th>Book Name</th>
+        <td>WordPress for Beginners 2022: A Visual Step-by-Step Guide to Mastering WordPress</td>
+    </tr>
+    <tr>
+        <th>Author</th>
+        <td>Dr. Andy Williams</td>
+    </tr>
+    <tr>
+        <th>Category</th>
+        <td colspan="2">Technology</td>
+    </tr>
+    <tr>
+        <th>ISBN Number</th>
+        <td colspan="2">B019MO3WCM</td>
+    </tr>
+    <tr>
+        <th>Book Price</th>
+        <td colspan="2">Rs. 100.00</td>
+    </tr>
+    <tr>
+        <th>Book Quantity</th>
+        <td colspan="2">15</td>
+    </tr>
+    <tr>
+        <th>Available Quantity</th>
+        <td colspan="2">15</td>
+    </tr>
+    <tr>
+        <th>Currently Reading</th>
+        <td colspan="2">0 people</td>
+    </tr>
+    <tr>
+        <th>Sold Copies</th>
+        <td colspan="2">0</td>
+    </tr>
+    <tr>
+        <th>In Your Cart</th>
+        <td colspan="2">0</td>
+    </tr>
+    <tr>
+        <th>Issue Status</th>
+        <td colspan="2">
+                <span style="color:green;">Available to request</span>
+                </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+        <a href="book-details.php?bookid=6" class="btn btn-info btn-block">Open Details</a>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+                <form method="post" action="cart.php" style="margin:0;">
+        <input type="hidden" name="bookid" value="6">
+        <input type="hidden" name="quantity" value="1">
+        <button type="submit" name="add_to_cart" class="btn btn-success btn-block">Add to Cart</button>
+        </form>
+                </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+                <form method="post" action="cart.php" style="margin:0;">
+        <input type="hidden" name="bookid" value="6">
+        <input type="hidden" name="quantity" value="1">
+        <button type="submit" name="buy_now" class="btn btn-warning btn-block">Buy Now</button>
+        </form>
+                </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+                <form method="post" style="margin:0;">
+        <input type="hidden" name="bookid" value="6">
+        <button type="submit" name="request_book" class="btn btn-primary btn-block">Request Book Issue</button>
+        </form>
+                </td>
+    </tr>
+</table>
+    </div>
+    <div class="col-md-4" style="min-height:640px;">
+    <table class="table table-bordered">
+     <tr>
+        <td rowspan="2" style="width:130px;"><img src="admin/bookimg/90083a56014186e88ffca10286172e64.jpg" width="120"></td>
+        <th>Book Name</th>
+        <td>WordPress Mastery Guide:</td>
+    </tr>
+    <tr>
+        <th>Author</th>
+        <td>Kyle Hill</td>
+    </tr>
+    <tr>
+        <th>Category</th>
+        <td colspan="2">Technology</td>
+    </tr>
+    <tr>
+        <th>ISBN Number</th>
+        <td colspan="2">B09NKWH7NP</td>
+    </tr>
+    <tr>
+        <th>Book Price</th>
+        <td colspan="2">Rs. 53.00</td>
+    </tr>
+    <tr>
+        <th>Book Quantity</th>
+        <td colspan="2">14</td>
+    </tr>
+    <tr>
+        <th>Available Quantity</th>
+        <td colspan="2">13</td>
+    </tr>
+    <tr>
+        <th>Currently Reading</th>
+        <td colspan="2">1 people</td>
+    </tr>
+    <tr>
+        <th>Sold Copies</th>
+        <td colspan="2">0</td>
+    </tr>
+    <tr>
+        <th>In Your Cart</th>
+        <td colspan="2">0</td>
+    </tr>
+    <tr>
+        <th>Issue Status</th>
+        <td colspan="2">
+                <span style="color:green;">Available to request</span>
+                </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+        <a href="book-details.php?bookid=7" class="btn btn-info btn-block">Open Details</a>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+                <form method="post" action="cart.php" style="margin:0;">
+        <input type="hidden" name="bookid" value="7">
+        <input type="hidden" name="quantity" value="1">
+        <button type="submit" name="add_to_cart" class="btn btn-success btn-block">Add to Cart</button>
+        </form>
+                </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+                <form method="post" action="cart.php" style="margin:0;">
+        <input type="hidden" name="bookid" value="7">
+        <input type="hidden" name="quantity" value="1">
+        <button type="submit" name="buy_now" class="btn btn-warning btn-block">Buy Now</button>
+        </form>
+                </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+                <form method="post" style="margin:0;">
+        <input type="hidden" name="bookid" value="7">
+        <button type="submit" name="request_book" class="btn btn-primary btn-block">Request Book Issue</button>
+        </form>
+                </td>
+    </tr>
+</table>
+    </div>
+    <div class="col-md-4" style="min-height:640px;">
+    <table class="table table-bordered">
+     <tr>
+        <td rowspan="2" style="width:130px;"><img src="admin/bookimg/52411b2bd2a6b2e0df3eb10943a5b640.jpg" width="120"></td>
+        <th>Book Name</th>
+        <td>Rich Dad Poor Dad: What the Rich Teach Their Kids About Money That the Poor and Middle Class Do Not</td>
+    </tr>
+    <tr>
+        <th>Author</th>
+        <td>Robert T. Kiyosak</td>
+    </tr>
+    <tr>
+        <th>Category</th>
+        <td colspan="2">General</td>
+    </tr>
+    <tr>
+        <th>ISBN Number</th>
+        <td colspan="2">B07C7M8SX9</td>
+    </tr>
+    <tr>
+        <th>Book Price</th>
+        <td colspan="2">Rs. 120.00</td>
+    </tr>
+    <tr>
+        <th>Book Quantity</th>
+        <td colspan="2">5</td>
+    </tr>
+    <tr>
+        <th>Available Quantity</th>
+        <td colspan="2">5</td>
+    </tr>
+    <tr>
+        <th>Currently Reading</th>
+        <td colspan="2">0 people</td>
+    </tr>
+    <tr>
+        <th>Sold Copies</th>
+        <td colspan="2">0</td>
+    </tr>
+    <tr>
+        <th>In Your Cart</th>
+        <td colspan="2">0</td>
+    </tr>
+    <tr>
+        <th>Issue Status</th>
+        <td colspan="2">
+                <span style="color:green;">Available to request</span>
+                </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+        <a href="book-details.php?bookid=8" class="btn btn-info btn-block">Open Details</a>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+                <form method="post" action="cart.php" style="margin:0;">
+        <input type="hidden" name="bookid" value="8">
+        <input type="hidden" name="quantity" value="1">
+        <button type="submit" name="add_to_cart" class="btn btn-success btn-block">Add to Cart</button>
+        </form>
+                </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+                <form method="post" action="cart.php" style="margin:0;">
+        <input type="hidden" name="bookid" value="8">
+        <input type="hidden" name="quantity" value="1">
+        <button type="submit" name="buy_now" class="btn btn-warning btn-block">Buy Now</button>
+        </form>
+                </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+                <form method="post" style="margin:0;">
+        <input type="hidden" name="bookid" value="8">
+        <button type="submit" name="request_book" class="btn btn-primary btn-block">Request Book Issue</button>
+        </form>
+                </td>
+    </tr>
+</table>
+    </div>
+    <div class="col-md-4" style="min-height:640px;">
+    <table class="table table-bordered">
+     <tr>
+        <td rowspan="2" style="width:130px;"><img src="admin/bookimg/f05cd198ac9335245e1fdffa793207a7.jpg" width="120"></td>
+        <th>Book Name</th>
+        <td>The Girl Who Drank the Moon</td>
+    </tr>
+    <tr>
+        <th>Author</th>
+        <td>Kelly Barnhill</td>
+    </tr>
+    <tr>
+        <th>Category</th>
+        <td colspan="2">General</td>
+    </tr>
+    <tr>
+        <th>ISBN Number</th>
+        <td colspan="2">1848126476</td>
+    </tr>
+    <tr>
+        <th>Book Price</th>
+        <td colspan="2">Rs. 200.00</td>
+    </tr>
+    <tr>
+        <th>Book Quantity</th>
+        <td colspan="2">1</td>
+    </tr>
+    <tr>
+        <th>Available Quantity</th>
+        <td colspan="2">1</td>
+    </tr>
+    <tr>
+        <th>Currently Reading</th>
+        <td colspan="2">0 people</td>
+    </tr>
+    <tr>
+        <th>Sold Copies</th>
+        <td colspan="2">0</td>
+    </tr>
+    <tr>
+        <th>In Your Cart</th>
+        <td colspan="2">0</td>
+    </tr>
+    <tr>
+        <th>Issue Status</th>
+        <td colspan="2">
+                <span style="color:green;">Available to request</span>
+                </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+        <a href="book-details.php?bookid=9" class="btn btn-info btn-block">Open Details</a>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+                <form method="post" action="cart.php" style="margin:0;">
+        <input type="hidden" name="bookid" value="9">
+        <input type="hidden" name="quantity" value="1">
+        <button type="submit" name="add_to_cart" class="btn btn-success btn-block">Add to Cart</button>
+        </form>
+                </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+                <form method="post" action="cart.php" style="margin:0;">
+        <input type="hidden" name="bookid" value="9">
+        <input type="hidden" name="quantity" value="1">
+        <button type="submit" name="buy_now" class="btn btn-warning btn-block">Buy Now</button>
+        </form>
+                </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+                <form method="post" style="margin:0;">
+        <input type="hidden" name="bookid" value="9">
+        <button type="submit" name="request_book" class="btn btn-primary btn-block">Request Book Issue</button>
+        </form>
+                </td>
+    </tr>
+</table>
+    </div>
+    <div class="col-md-4" style="min-height:640px;">
+    <table class="table table-bordered">
+     <tr>
+        <td rowspan="2" style="width:130px;"><img src="admin/bookimg/36af5de9012bf8c804e499dc3c3b33a5.jpg" width="120"></td>
+        <th>Book Name</th>
+        <td>C++: The Complete Reference, 4th Edition</td>
+    </tr>
+    <tr>
+        <th>Author</th>
+        <td>Herbert Schildt</td>
+    </tr>
+    <tr>
+        <th>Category</th>
+        <td colspan="2">Technology</td>
+    </tr>
+    <tr>
+        <th>ISBN Number</th>
+        <td colspan="2">007053246X</td>
+    </tr>
+    <tr>
+        <th>Book Price</th>
+        <td colspan="2">Rs. 142.00</td>
+    </tr>
+    <tr>
+        <th>Book Quantity</th>
+        <td colspan="2">2</td>
+    </tr>
+    <tr>
+        <th>Available Quantity</th>
+        <td colspan="2">2</td>
+    </tr>
+    <tr>
+        <th>Currently Reading</th>
+        <td colspan="2">0 people</td>
+    </tr>
+    <tr>
+        <th>Sold Copies</th>
+        <td colspan="2">0</td>
+    </tr>
+    <tr>
+        <th>In Your Cart</th>
+        <td colspan="2">0</td>
+    </tr>
+    <tr>
+        <th>Issue Status</th>
+        <td colspan="2">
+                <span style="color:green;">Available to request</span>
+                </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+        <a href="book-details.php?bookid=10" class="btn btn-info btn-block">Open Details</a>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+                <form method="post" action="cart.php" style="margin:0;">
+        <input type="hidden" name="bookid" value="10">
+        <input type="hidden" name="quantity" value="1">
+        <button type="submit" name="add_to_cart" class="btn btn-success btn-block">Add to Cart</button>
+        </form>
+                </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+                <form method="post" action="cart.php" style="margin:0;">
+        <input type="hidden" name="bookid" value="10">
+        <input type="hidden" name="quantity" value="1">
+        <button type="submit" name="buy_now" class="btn btn-warning btn-block">Buy Now</button>
+        </form>
+                </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+                <form method="post" style="margin:0;">
+        <input type="hidden" name="bookid" value="10">
+        <button type="submit" name="request_book" class="btn btn-primary btn-block">Request Book Issue</button>
+        </form>
+                </td>
+    </tr>
+</table>
+    </div>
+    <div class="col-md-4" style="min-height:640px;">
+    <table class="table table-bordered">
+     <tr>
+        <td rowspan="2" style="width:130px;"><img src="admin/bookimg/b1b6788016bbfab12cfd2722604badc9.jpg" width="120"></td>
+        <th>Book Name</th>
+        <td>ASP.NET Core 5 for Beginners</td>
+    </tr>
+    <tr>
+        <th>Author</th>
+        <td>Kyle Hill</td>
+    </tr>
+    <tr>
+        <th>Category</th>
+        <td colspan="2">Programming</td>
+    </tr>
+    <tr>
+        <th>ISBN Number</th>
+        <td colspan="2">GBSJ36344563</td>
+    </tr>
+    <tr>
+        <th>Book Price</th>
+        <td colspan="2">Rs. 422.00</td>
+    </tr>
+    <tr>
+        <th>Book Quantity</th>
+        <td colspan="2">5</td>
+    </tr>
+    <tr>
+        <th>Available Quantity</th>
+        <td colspan="2">5</td>
+    </tr>
+    <tr>
+        <th>Currently Reading</th>
+        <td colspan="2">0 people</td>
+    </tr>
+    <tr>
+        <th>Sold Copies</th>
+        <td colspan="2">0</td>
+    </tr>
+    <tr>
+        <th>In Your Cart</th>
+        <td colspan="2">0</td>
+    </tr>
+    <tr>
+        <th>Issue Status</th>
+        <td colspan="2">
+                <span style="color:green;">Available to request</span>
+                </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+        <a href="book-details.php?bookid=11" class="btn btn-info btn-block">Open Details</a>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+                <form method="post" action="cart.php" style="margin:0;">
+        <input type="hidden" name="bookid" value="11">
+        <input type="hidden" name="quantity" value="1">
+        <button type="submit" name="add_to_cart" class="btn btn-success btn-block">Add to Cart</button>
+        </form>
+                </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+                <form method="post" action="cart.php" style="margin:0;">
+        <input type="hidden" name="bookid" value="11">
+        <input type="hidden" name="quantity" value="1">
+        <button type="submit" name="buy_now" class="btn btn-warning btn-block">Buy Now</button>
+        </form>
+                </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+                <form method="post" style="margin:0;">
+        <input type="hidden" name="bookid" value="11">
+        <button type="submit" name="request_book" class="btn btn-primary btn-block">Request Book Issue</button>
+        </form>
+                </td>
+    </tr>
+</table>
+    </div>
+    <div class="col-md-4" style="min-height:640px;">
+    <table class="table table-bordered">
+     <tr>
+        <td rowspan="2" style="width:130px;"><img src="admin/bookimg/ba719639def504c64ebac89cdd0d0a85.jpg" width="120"></td>
+        <th>Book Name</th>
+        <td>Python Packages</td>
+    </tr>
+    <tr>
+        <th>Author</th>
+        <td> Tiffany Timbers</td>
+    </tr>
+    <tr>
+        <th>Category</th>
+        <td colspan="2">Programming</td>
+    </tr>
+    <tr>
+        <th>ISBN Number</th>
+        <td colspan="2">0367687771</td>
+    </tr>
+    <tr>
+        <th>Book Price</th>
+        <td colspan="2">Rs. 3,034.00</td>
+    </tr>
+    <tr>
+        <th>Book Quantity</th>
+        <td colspan="2">25</td>
+    </tr>
+    <tr>
+        <th>Available Quantity</th>
+        <td colspan="2">24</td>
+    </tr>
+    <tr>
+        <th>Currently Reading</th>
+        <td colspan="2">1 people</td>
+    </tr>
+    <tr>
+        <th>Sold Copies</th>
+        <td colspan="2">0</td>
+    </tr>
+    <tr>
+        <th>In Your Cart</th>
+        <td colspan="2">0</td>
+    </tr>
+    <tr>
+        <th>Issue Status</th>
+        <td colspan="2">
+                <span style="color:green;">Already issued to you</span>
+                </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+        <a href="book-details.php?bookid=12" class="btn btn-info btn-block">Open Details</a>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+                <form method="post" action="cart.php" style="margin:0;">
+        <input type="hidden" name="bookid" value="12">
+        <input type="hidden" name="quantity" value="1">
+        <button type="submit" name="add_to_cart" class="btn btn-success btn-block">Add to Cart</button>
+        </form>
+                </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+                <form method="post" action="cart.php" style="margin:0;">
+        <input type="hidden" name="bookid" value="12">
+        <input type="hidden" name="quantity" value="1">
+        <button type="submit" name="buy_now" class="btn btn-warning btn-block">Buy Now</button>
+        </form>
+                </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+                <button type="button" class="btn btn-success btn-block" disabled>Already Issued</button>
+                </td>
+    </tr>
+</table>
+    </div>
+        </div>
+    </div>
+    </div>
+   <section class="footer-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                 Online Library Management System</a> 
+                </div>
+
+            </div>
+        </div>
+    </section>    <script src="assets/js/jquery-1.10.2.js"></script>
+    <script src="assets/js/bootstrap.js"></script>
+    <script src="assets/js/custom.js"></script>
+</body>
+</html>

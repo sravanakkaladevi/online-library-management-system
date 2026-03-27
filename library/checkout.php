@@ -13,8 +13,7 @@ exit;
 
 $sid=$_SESSION['stdid'];
 $paymentMethods=array(
-'demo_gateway'=>array('label'=>'Card / Net Banking (Demo Gateway)','provider'=>'Demo Gateway'),
-'upi_demo'=>array('label'=>'UPI (Demo)','provider'=>'Demo UPI'),
+'card_payment'=>array('label'=>'Card Payment','provider'=>'Card Gateway'),
 'counter_payment'=>array('label'=>'Pay at Library Counter','provider'=>'Library Counter'),
 );
 
@@ -26,10 +25,10 @@ exit;
 
 if(isset($_POST['place_order']))
 {
-$paymentMethod=isset($_POST['payment_method']) ? trim($_POST['payment_method']) : 'demo_gateway';
+$paymentMethod=isset($_POST['payment_method']) ? trim($_POST['payment_method']) : 'card_payment';
 if(!isset($paymentMethods[$paymentMethod]))
 {
-$paymentMethod='demo_gateway';
+$paymentMethod='card_payment';
 }
 
 try {
@@ -136,7 +135,7 @@ array(
 $orderNumber=generateOrderNumber();
 $transactionId=generateTransactionId();
 $provider=$paymentMethods[$paymentMethod]['provider'];
-$paymentStatus='paid';
+$paymentStatus=$paymentMethod==='counter_payment' ? 'pending_confirmation' : 'paid';
 $orderStatus='placed';
 $insertOrderSql="INSERT INTO tblorders(OrderNumber,StudentId,TotalAmount,PaymentMethod,PaymentProvider,PaymentStatus,OrderStatus,TransactionId)
 VALUES(:ordernumber,:sid,:totalamount,:paymentmethod,:provider,:paymentstatus,:orderstatus,:transactionid)";
@@ -170,7 +169,13 @@ $clearQuery->bindParam(':sid',$sid,PDO::PARAM_STR);
 $clearQuery->execute();
 
 $dbh->commit();
-$_SESSION['msg']="Order placed successfully. Order number: " . $orderNumber;
+if($paymentMethod==='counter_payment')
+{
+$_SESSION['msg']="Order placed successfully. Pay at the library counter and wait for admin confirmation. Order number: " . $orderNumber;
+}
+else {
+$_SESSION['msg']="Order placed successfully. Card payment was confirmed instantly. Order number: " . $orderNumber;
+}
 redirectToCheckout('order-details.php?orderid=' . $orderId);
 }
 catch (Exception $e)
@@ -405,6 +410,230 @@ $hasAvailabilityIssue=true;
             line-height: 1.6;
         }
 
+        .counter-transaction-card {
+            background-color: #ffffff;
+            display: flex;
+            width: 100%;
+            min-height: 120px;
+            position: relative;
+            border-radius: 16px;
+            transition: 0.3s ease-in-out;
+            border: 1px solid #d8f3e5;
+            overflow: hidden;
+        }
+
+        .counter-transaction-card:hover {
+            transform: scale(1.02);
+        }
+
+        .counter-transaction-left {
+            background-color: #5de2a3;
+            width: 130px;
+            min-height: 120px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .counter-transaction-right {
+            width: calc(100% - 130px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px 18px;
+        }
+
+        .counter-arrow {
+            width: 22px;
+            height: 22px;
+            flex: 0 0 auto;
+        }
+
+        .counter-card-mini {
+            width: 70px;
+            height: 46px;
+            background-color: #c7ffbc;
+            border-radius: 6px;
+            position: absolute;
+            display: flex;
+            z-index: 10;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 9px 9px 9px -2px rgba(77, 200, 143, 0.72);
+        }
+
+        .counter-card-line {
+            width: 65px;
+            height: 13px;
+            background-color: #80ea69;
+            border-radius: 2px;
+            margin-top: 7px;
+        }
+
+        .counter-buttons {
+            width: 8px;
+            height: 8px;
+            background-color: #379e1f;
+            box-shadow: 0 -10px 0 0 #26850e, 0 10px 0 0 #56be3e;
+            border-radius: 50%;
+            transform: rotate(90deg);
+            margin: 10px 0 0 -30px;
+        }
+
+        .counter-post {
+            width: 63px;
+            height: 75px;
+            background-color: #dddde0;
+            position: absolute;
+            z-index: 11;
+            bottom: 10px;
+            top: 120px;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .counter-post-line {
+            width: 47px;
+            height: 9px;
+            background-color: #545354;
+            position: absolute;
+            border-radius: 0 0 3px 3px;
+            right: 8px;
+            top: 8px;
+        }
+
+        .counter-post-line:before {
+            content: "";
+            position: absolute;
+            width: 47px;
+            height: 9px;
+            background-color: #757375;
+            top: -8px;
+        }
+
+        .counter-screen {
+            width: 47px;
+            height: 23px;
+            background-color: #ffffff;
+            position: absolute;
+            top: 22px;
+            right: 8px;
+            border-radius: 3px;
+        }
+
+        .counter-rupee {
+            position: absolute;
+            font-size: 16px;
+            font-family: "Lexend Deca", sans-serif;
+            width: 100%;
+            left: 0;
+            top: 0;
+            color: #4b953b;
+            text-align: center;
+        }
+
+        .counter-numbers {
+            width: 12px;
+            height: 12px;
+            background-color: #838183;
+            box-shadow: 0 -18px 0 0 #838183, 0 18px 0 0 #838183;
+            border-radius: 2px;
+            position: absolute;
+            transform: rotate(90deg);
+            left: 25px;
+            top: 52px;
+        }
+
+        .counter-numbers-line2 {
+            width: 12px;
+            height: 12px;
+            background-color: #aaa9ab;
+            box-shadow: 0 -18px 0 0 #aaa9ab, 0 18px 0 0 #aaa9ab;
+            border-radius: 2px;
+            position: absolute;
+            transform: rotate(90deg);
+            left: 25px;
+            top: 68px;
+        }
+
+        .counter-instructions {
+            margin: 0;
+            padding: 14px 16px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #effff5 0%, #f8fffc 100%);
+            border: 1px solid #d8f3e5;
+            color: #285943;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .counter-waiting-note {
+            margin: 0;
+            text-align: center;
+            color: #285943;
+            font-size: 13px;
+            line-height: 1.7;
+            font-weight: 600;
+        }
+
+        .card-instructions {
+            margin: 0;
+            padding: 14px 16px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #eff6ff 0%, #f8fbff 100%);
+            border: 1px solid #dbe8f5;
+            color: #1e3a5f;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .payment-section {
+            display: none;
+        }
+
+        .payment-section.is-active {
+            display: block;
+        }
+
+        .counter-transaction-card:hover .counter-card-mini {
+            animation: slide-top 1.2s cubic-bezier(0.645, 0.045, 0.355, 1) both;
+        }
+
+        .counter-transaction-card:hover .counter-post {
+            animation: slide-post 1s cubic-bezier(0.165, 0.84, 0.44, 1) both;
+        }
+
+        .counter-transaction-card:hover .counter-rupee {
+            animation: fade-in-fwd 0.3s 1s backwards;
+        }
+
+        @keyframes slide-top {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-70px) rotate(90deg); }
+            60% { transform: translateY(-70px) rotate(90deg); }
+            100% { transform: translateY(-8px) rotate(90deg); }
+        }
+
+        @keyframes slide-post {
+            50% { transform: translateY(0); }
+            100% { transform: translateY(-70px); }
+        }
+
+        @keyframes fade-in-fwd {
+            0% {
+                opacity: 0;
+                transform: translateY(-5px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         .input_field::-webkit-outer-spin-button,
         .input_field::-webkit-inner-spin-button {
             -webkit-appearance: none;
@@ -424,6 +653,15 @@ $hasAvailabilityIssue=true;
 
             .split {
                 grid-template-columns: 1fr;
+            }
+
+            .counter-transaction-card {
+                flex-direction: column;
+            }
+
+            .counter-transaction-left,
+            .counter-transaction-right {
+                width: 100%;
             }
         }
     </style>
@@ -526,60 +764,85 @@ $cnt=$cnt+1;
             </div>
             <div class="col-md-4">
                 <div class="checkout-payment-modal">
-                    <form method="post" class="form" id="demoCheckoutForm">
+                    <form method="post" class="form">
                         <div class="checkout-payment-top">
                             <div>
-                                <h4>Payment Gateway</h4>
-                                <p>Demo checkout with a realistic payment look and feel.</p>
+                                <h4>Choose Payment</h4>
+                                <p>Select card for instant payment or pay at counter for admin confirmation.</p>
                             </div>
-                            <span class="checkout-payment-pill">Secure Demo</span>
+                            <span class="checkout-payment-pill">2 Options</span>
                         </div>
                         <div class="checkout-summary-box">
                             <p><strong>Total Items:</strong> <?php echo htmlentities($totalItems);?></p>
                             <p><strong>Grand Total:</strong> Rs. <?php echo htmlentities(number_format((float)$grandTotal,2));?></p>
                         </div>
                         <div class="payment--options">
-                            <button name="paypal" type="button" class="payment-method-btn is-selected" data-method="demo_gateway" title="Card / Net Banking (Demo)">
-                                <svg xml:space="preserve" viewBox="0 0 124 33" width="124" height="33" xmlns="http://www.w3.org/2000/svg"><path d="M46.211,6.749h-6.839c-0.468,0-0.866,0.34-0.939,0.802l-2.766,17.537c-0.055,0.346,0.213,0.658,0.564,0.658h3.265c0.468,0,0.866-0.34,0.939-0.803l0.746-4.73c0.072-0.463,0.471-0.803,0.938-0.803h2.165c4.505,0,7.105-2.18,7.784-6.5c0.306-1.89,0.013-3.375-0.872-4.415C50.224,7.353,48.5,6.749,46.211,6.749z M47,13.154c-0.374,2.454-2.249,2.454-4.062,2.454h-1.032l0.724-4.583c0.043-0.277,0.283-0.481,0.563-0.481h0.473c1.235,0,2.4,0,3.002,0.704C47.027,11.668,47.137,12.292,47,13.154z" fill="#253B80"></path><path d="M66.654,13.075h-3.275c-0.279,0-0.52,0.204-0.563,0.481l-0.145,0.916l-0.229-0.332c-0.709-1.029-2.29-1.373-3.868-1.373c-3.619,0-6.71,2.741-7.312,6.586c-0.313,1.918,0.132,3.752,1.22,5.031c0.998,1.176,2.426,1.666,4.125,1.666c2.916,0,4.533-1.875,4.533-1.875l-0.146,0.91c-0.055,0.348,0.213,0.66,0.562,0.66h2.95c0.469,0,0.865-0.34,0.939-0.803l1.77-11.209C67.271,13.388,67.004,13.075,66.654,13.075z" fill="#253B80"></path><path d="M94.992,6.749h-6.84c-0.467,0-0.865,0.34-0.938,0.802l-2.766,17.537c-0.055,0.346,0.213,0.658,0.562,0.658h3.51c0.326,0,0.605-0.238,0.656-0.562l0.785-4.971c0.072-0.463,0.471-0.803,0.938-0.803h2.164c4.506,0,7.105-2.18,7.785-6.5c0.307-1.89,0.012-3.375-0.873-4.415C99.004,7.353,97.281,6.749,94.992,6.749z" fill="#179BD7"></path></svg>
+                            <button type="button" class="payment-method-btn is-selected" data-method="card_payment" title="Card Payment">
+                                <i class="fa fa-credit-card" style="font-size:20px;"></i>
                             </button>
-                            <button name="apple-pay" type="button" class="payment-method-btn" data-method="upi_demo" title="UPI (Demo)">
-                                <svg xml:space="preserve" viewBox="0 0 512 210.2" xmlns="http://www.w3.org/2000/svg"><path d="M93.6,27.1C87.6,34.2,78,39.8,68.4,39c-1.2-9.6,3.5-19.8,9-26.1c6-7.3,16.5-12.5,25-12.9C103.4,10,99.5,19.8,93.6,27.1 M102.3,40.9c-13.9-0.8-25.8,7.9-32.4,7.9c-6.7,0-16.8-7.5-27.8-7.3c-14.3,0.2-27.6,8.3-34.9,21.2c-15,25.8-3.9,64,10.6,85c7.1,10.4,15.6,21.8,26.8,21.4c10.6-0.4,14.8-6.9,27.6-6.9c12.9,0,16.6,6.9,27.8,6.7c11.6-0.2,18.9-10.4,26-20.8c8.1-11.8,11.4-23.3,11.6-23.9c-0.2-0.2-22.4-8.7-22.6-34.3c-0.2-21.4,17.5-31.6,18.3-32.2C123.3,42.9,107.7,41.3,102.3,40.9" id="XMLID_34_"></path></svg>
-                            </button>
-                            <button name="google-pay" type="button" class="payment-method-btn" data-method="counter_payment" title="Pay at Library Counter">
-                                <svg fill="none" viewBox="0 0 80 39" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_134_34)"><path fill="#5F6368" d="M37.8 19.7V29H34.8V6H42.6C44.5 6 46.3001 6.7 47.7001 8C49.1001 9.2 49.8 11 49.8 12.9C49.8 14.8 49.1001 16.5 47.7001 17.8C46.3001 19.1 44.6 19.8 42.6 19.8L37.8 19.7Z"></path><path fill="#4285F4" d="M25.9 17.7C25.9 16.8 25.8 15.9 25.7 15H13.2V20.1H20.3C20 21.7 19.1 23.2 17.7 24.1V27.4H22C24.5 25.1 25.9 21.7 25.9 17.7Z"></path><path fill="#34A853" d="M13.1999 30.5999C16.7999 30.5999 19.7999 29.3999 21.9999 27.3999L17.6999 24.0999C16.4999 24.8999 14.9999 25.3999 13.1999 25.3999C9.7999 25.3999 6.7999 23.0999 5.7999 19.8999H1.3999V23.2999C3.6999 27.7999 8.1999 30.5999 13.1999 30.5999Z"></path></g><defs><clipPath id="clip0_134_34"><rect fill="white" height="38.1" width="80"></rect></clipPath></defs></svg>
+                            <button type="button" class="payment-method-btn" data-method="counter_payment" title="Pay at Library Counter">
+                                <i class="fa fa-money" style="font-size:20px;"></i>
                             </button>
                         </div>
-                        <input type="hidden" name="payment_method" id="selectedPaymentMethod" value="demo_gateway" />
-                        <div class="separator">
-                            <hr class="line" />
-                            <p>or pay using credit card</p>
-                            <hr class="line" />
-                        </div>
-                        <div class="credit-card-info--form">
-                            <div class="input_container">
-                                <label for="card_holder_name" class="input_label">Card holder full name</label>
-                                <input id="card_holder_name" class="input_field" type="text" placeholder="Enter your full name" value="<?php echo htmlentities(isset($_SESSION['login']) ? $_SESSION['login'] : '');?>"/>
+                        <input type="hidden" name="payment_method" id="selectedPaymentMethod" value="card_payment" />
+
+                        <div class="payment-section payment-section-card is-active" id="paymentSectionCard">
+                            <div class="separator">
+                                <hr class="line" />
+                                <p>card payment</p>
+                                <hr class="line" />
                             </div>
-                            <div class="input_container">
-                                <label for="card_number" class="input_label">Card Number</label>
-                                <input id="card_number" class="input_field" type="text" inputmode="numeric" placeholder="0000 0000 0000 0000" value="4242 4242 4242 4242" />
-                            </div>
-                            <div class="input_container">
-                                <label for="expiry_date" class="input_label">Expiry Date / CVV</label>
-                                <div class="split">
-                                    <input id="expiry_date" class="input_field" type="text" placeholder="12/28" value="12/28" />
-                                    <input id="cvv" class="input_field" type="password" inputmode="numeric" placeholder="123" value="123" />
+                            <div class="credit-card-info--form">
+                                <div class="input_container">
+                                    <label for="card_holder_name" class="input_label">Card holder full name</label>
+                                    <input id="card_holder_name" class="input_field" type="text" placeholder="Enter your full name" value="<?php echo htmlentities(isset($_SESSION['login']) ? $_SESSION['login'] : '');?>" />
+                                </div>
+                                <div class="input_container">
+                                    <label for="card_number" class="input_label">Card Number</label>
+                                    <input id="card_number" class="input_field" type="text" inputmode="numeric" placeholder="0000 0000 0000 0000" value="4242 4242 4242 4242" />
+                                </div>
+                                <div class="input_container">
+                                    <label for="expiry_date" class="input_label">Expiry Date / CVV</label>
+                                    <div class="split">
+                                        <input id="expiry_date" class="input_field" type="text" placeholder="12/28" value="12/28" />
+                                        <input id="cvv" class="input_field" type="password" inputmode="numeric" placeholder="123" value="123" />
+                                    </div>
                                 </div>
                             </div>
+                            <p class="card-instructions">Card payment marks the order as paid immediately and order processing can continue without admin payment confirmation.</p>
                         </div>
-                        <p class="demo-payment-note">This is a demo payment UI for a realistic checkout experience. Any option will still place a demo paid order in the current project.</p>
+
+                        <div class="payment-section payment-section-counter" id="paymentSectionCounter">
+                        <div class="counter-transaction-card">
+                            <div class="counter-transaction-left">
+                                <div class="counter-card-mini">
+                                    <div class="counter-card-line"></div>
+                                    <div class="counter-buttons"></div>
+                                </div>
+                                <div class="counter-post">
+                                    <div class="counter-post-line"></div>
+                                    <div class="counter-screen">
+                                        <div class="counter-rupee">Rs</div>
+                                    </div>
+                                    <div class="counter-numbers"></div>
+                                    <div class="counter-numbers-line2"></div>
+                                </div>
+                            </div>
+                            <div class="counter-transaction-right">
+                                <svg viewBox="0 0 451.846 451.847" xmlns="http://www.w3.org/2000/svg" class="counter-arrow"><path fill="#cfcfcf" d="M345.441 248.292L151.154 442.573c-12.359 12.365-32.397 12.365-44.75 0-12.354-12.354-12.354-32.391 0-44.744L278.318 225.92 106.409 54.017c-12.354-12.359-12.354-32.394 0-44.748 12.354-12.359 32.391-12.359 44.75 0l194.287 194.284c6.177 6.18 9.262 14.271 9.262 22.366 0 8.099-3.091 16.196-9.267 22.373z"></path></svg>
+                            </div>
+                        </div>
+                        <p class="counter-waiting-note">Waiting for admin approval after offline payment at counter.</p>
+                        <p class="counter-instructions">Payment status will remain pending until the admin confirms that the amount was collected at the counter.</p>
+                        </div>
+                        <p class="demo-payment-note">Card Payment -> order direct Paid. Pay at Counter -> admin confirmation needed.</p>
 <?php if($hasAvailabilityIssue){ ?>
                         <div class="alert alert-warning" style="margin-bottom:0;">
                             Update the cart first because one or more quantities exceed the current available stock.
                         </div>
                         <a href="cart.php" class="btn btn-warning btn-block">Review Cart</a>
 <?php } else { ?>
-                        <button type="submit" name="place_order" class="purchase--btn">Checkout</button>
+                        <button type="submit" name="place_order" class="purchase--btn">Place Order</button>
 <?php } ?>
                     </form>
                 </div>
@@ -596,6 +859,8 @@ $cnt=$cnt+1;
     (function () {
         var buttons=document.getElementsByClassName('payment-method-btn');
         var paymentInput=document.getElementById('selectedPaymentMethod');
+        var cardSection=document.getElementById('paymentSectionCard');
+        var counterSection=document.getElementById('paymentSectionCounter');
         var i=0;
 
         if(!paymentInput){
@@ -610,7 +875,16 @@ $cnt=$cnt+1;
                     buttons[i].className='payment-method-btn';
                 }
             }
+
             paymentInput.value=method;
+
+            if(cardSection){
+                cardSection.className='payment-section payment-section-card' + (method==='card_payment' ? ' is-active' : '');
+            }
+
+            if(counterSection){
+                counterSection.className='payment-section payment-section-counter' + (method==='counter_payment' ? ' is-active' : '');
+            }
         }
 
         for(i=0;i<buttons.length;i++){

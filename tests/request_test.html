@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>Online Library Management System | Book Details</title>
+    <link href="assets/css/bootstrap.css" rel="stylesheet" />
+    <link href="assets/css/font-awesome.css" rel="stylesheet" />
+    <link href="assets/css/style.css" rel="stylesheet" />
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
+</head>
+<body>
+<div class="navbar navbar-inverse set-radius-zero" >
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" >
+
+                    <img src="assets/img/logo.png" />
+                </a>
+
+            </div>
+ 
+            <div class="right-div">
+                <a href="logout.php" class="btn btn-danger pull-right">LOG ME OUT</a>
+            </div>
+                    </div>
+    </div>
+    <!-- LOGO HEADER END-->
+    
+<section class="menu-section">
+        <div class="container">
+            <div class="row ">
+                <div class="col-md-12">
+                    <div class="navbar-collapse collapse ">
+                        <ul id="menu-top" class="nav navbar-nav navbar-right">
+                            <li><a href="dashboard.php" class="menu-top-active">DASHBOARD</a></li>
+                            <li><a href="listed-books.php">Listed Books</a></li>
+                            <li><a href="issued-books.php">Issued Books</a></li>
+                            <li><a href="book-requests.php">Book Requests</a></li>
+                            <li><a href="cart.php">Cart</a></li>
+                             <li>
+                                <a href="#" class="dropdown-toggle" id="ddlmenuItem" data-toggle="dropdown"> Account <i class="fa fa-angle-down"></i></a>
+                                <ul class="dropdown-menu" role="menu" aria-labelledby="ddlmenuItem">
+                                    <li role="presentation"><a role="menuitem" tabindex="-1" href="my-profile.php">My Profile</a></li>
+                                    <li role="presentation"><a role="menuitem" tabindex="-1" href="my-orders.php">My Orders</a></li>
+                                     <li role="presentation"><a role="menuitem" tabindex="-1" href="change-password.php">Change Password</a></li>
+                                </ul>
+                            </li>
+
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+        <div class="content-wrapper">
+         <div class="container">
+        <div class="row pad-botm">
+            <div class="col-md-8">
+                <h4 class="header-line">Book Details</h4>
+            </div>
+            <div class="col-md-4 text-right">
+                <a href="listed-books.php" class="btn btn-default">Back to Books</a>
+            </div>
+        </div>
+
+        <div class="row">
+                        <div class="col-md-12">
+            <div class="alert alert-success">
+                <strong>Success :</strong>
+                Book request submitted successfully. Admin can review it now.                            </div>
+        </div>
+                </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="panel panel-default">
+                    <div class="panel-body text-center">
+                        <img src="admin/bookimg/144ab706ba1cb9f6c23fd6ae9c0502b3.jpg" class="img-responsive" style="margin:0 auto; max-height:320px;" alt="WordPress for Beginners 2022: A Visual Step-by-Step Guide to Mastering WordPress" />
+                        <hr />
+                        <p><strong>Digital Preview:</strong> No e-book file is attached in this project yet.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        WordPress for Beginners 2022: A Visual Step-by-Step Guide to Mastering WordPress                    </div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Author:</strong> Dr. Andy Williams</p>
+                                <p><strong>Category:</strong> Technology</p>
+                                <p><strong>ISBN:</strong> B019MO3WCM</p>
+                                <p><strong>Price:</strong> Rs. 100.00</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Total Quantity:</strong> 15</p>
+                                <p><strong>Available Quantity:</strong> 15</p>
+                                <p><strong>Currently Reading:</strong> 0 people</p>
+                                <p><strong>Sold Copies:</strong> 0</p>
+                                <p><strong>In Your Cart:</strong> 0</p>
+                            </div>
+                        </div>
+                        <hr />
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="alert alert-warning">Your issue request is waiting for admin approval.</div>
+                            </div>
+                            <div class="col-md-6">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <form method="post" action="cart.php">
+                                    <input type="hidden" name="bookid" value="6">
+                                    <div class="form-group">
+                                        <label>Purchase Quantity</label>
+                                        <input type="number" name="quantity" min="1" value="1" class="form-control"  />
+                                    </div>
+                                    <button type="submit" name="add_to_cart" class="btn btn-success">Add to Cart</button>
+                                    <button type="submit" name="buy_now" class="btn btn-warning">Buy Now</button>
+                                </form>
+                            </div>
+                            <div class="col-md-6">
+                                <button type="button" class="btn btn-warning" disabled>Request Pending</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+   <section class="footer-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                 Online Library Management System</a> 
+                </div>
+
+            </div>
+        </div>
+    </section>    <script src="assets/js/jquery-1.10.2.js"></script>
+    <script src="assets/js/bootstrap.js"></script>
+    <script src="assets/js/custom.js"></script>
+</body>
+</html>

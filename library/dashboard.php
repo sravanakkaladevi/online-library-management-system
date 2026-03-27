@@ -2,6 +2,7 @@
 session_start();
 error_reporting(0);
 include('includes/config.php');
+include_once('includes/user-preferences.php');
 if(empty($_SESSION['login']) || empty($_SESSION['stdid']))
   { 
 unset($_SESSION['login']);
@@ -12,6 +13,10 @@ exit;
 else{?>
 <?php
 $sid=$_SESSION['stdid'];
+$preferences=getUserPreferences($dbh, $sid);
+$dashboardThemeColor=$preferences['ThemeColor'];
+$dashboardThemeSoft=hexToRgba($dashboardThemeColor, 0.20);
+$dashboardThemeGlow=hexToRgba($dashboardThemeColor, 0.35);
 $studentName='Reader';
 $studentEmail='';
 $profileQuery=$dbh->prepare("SELECT FullName,EmailId FROM tblstudents WHERE StudentId=:sid LIMIT 1");
@@ -58,106 +63,174 @@ $studentInitials='R';
     <!-- GOOGLE FONT -->
     <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
     <style type="text/css">
-        .dashboard-welcome {
-            position: relative;
-            overflow: hidden;
-            margin-bottom: 28px;
-            padding: 26px 28px;
-            border-radius: 28px;
-            background: linear-gradient(135deg, #eff6ff 0%, #ffffff 45%, #eefbf5 100%);
-            border: 1px solid #d9e8f7;
-            box-shadow: 0 22px 50px rgba(15, 23, 42, 0.08);
+        :root {
+            --dashboard-theme: <?php echo htmlentities($dashboardThemeColor);?>;
+            --dashboard-theme-soft: <?php echo htmlentities($dashboardThemeSoft);?>;
+            --dashboard-theme-glow: <?php echo htmlentities($dashboardThemeGlow);?>;
         }
 
-        .dashboard-welcome:before,
-        .dashboard-welcome:after {
-            content: "";
-            position: absolute;
-            border-radius: 999px;
-            filter: blur(8px);
-            opacity: 0.55;
-            animation: welcomeFloat 7s ease-in-out infinite;
+        body.dashboard-page {
+            background:
+                linear-gradient(135deg, rgba(8, 15, 28, 0.28) 0%, rgba(15, 23, 42, 0.18) 38%, rgba(8, 15, 28, 0.26) 100%),
+                url('assets/img/library-hero.jpg') center center / cover fixed no-repeat;
         }
 
-        .dashboard-welcome:before {
-            width: 180px;
-            height: 180px;
-            right: -50px;
-            top: -40px;
-            background: rgba(37, 99, 235, 0.14);
+        body.dashboard-page .content-wrapper {
+            background: transparent;
         }
 
-        .dashboard-welcome:after {
-            width: 130px;
-            height: 130px;
-            left: -30px;
-            bottom: -35px;
-            background: rgba(16, 185, 129, 0.16);
-            animation-delay: -2s;
-        }
-
-        .dashboard-welcome__content {
+        body.dashboard-page .container {
             position: relative;
             z-index: 1;
         }
 
-        .dashboard-welcome__title {
-            margin: 0 0 8px;
-            font-size: 34px;
+        .dashboard-shell {
+            position: relative;
+            padding: 22px;
+            border-radius: 40px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.18) 0%, rgba(248,250,252,0.14) 45%, rgba(255,255,255,0.16) 100%);
+            border: 3px solid var(--dashboard-theme);
+            box-shadow:
+                0 0 0 6px var(--dashboard-theme-soft),
+                0 0 36px var(--dashboard-theme-glow),
+                0 28px 60px rgba(15, 23, 42, 0.10);
+            backdrop-filter: blur(8px);
+        }
+
+        .dashboard-hero {
+            position: relative;
+            overflow: hidden;
+            min-height: 360px;
+            margin-bottom: 0;
+            padding: 34px 32px 26px;
+            border-radius: 28px;
+            background:
+                linear-gradient(115deg, rgba(255, 255, 255, 0.76) 0%, rgba(248, 250, 252, 0.52) 34%, rgba(239, 246, 255, 0.30) 100%);
+            border: 1px solid rgba(255,255,255,0.42);
+            box-shadow:
+                inset 0 0 0 1px rgba(255,255,255,0.14),
+                0 30px 60px rgba(15, 23, 42, 0.16);
+            backdrop-filter: blur(3px);
+        }
+
+        .dashboard-hero:before,
+        .dashboard-hero:after {
+            content: "";
+            position: absolute;
+            border-radius: 999px;
+            filter: blur(12px);
+            opacity: 0.65;
+            animation: welcomeFloat 9s ease-in-out infinite;
+        }
+
+        .dashboard-hero:before {
+            width: 220px;
+            height: 220px;
+            right: -40px;
+            top: -55px;
+            background: rgba(56, 189, 248, 0.20);
+        }
+
+        .dashboard-hero:after {
+            width: 170px;
+            height: 170px;
+            left: -20px;
+            bottom: -45px;
+            background: rgba(16, 185, 129, 0.18);
+            animation-delay: -2s;
+        }
+
+        .dashboard-hero__content {
+            position: relative;
+            z-index: 1;
+            max-width: 620px;
+        }
+
+        .dashboard-kicker {
+            display: inline-block;
+            margin-bottom: 16px;
+            color: var(--dashboard-theme);
+            font-size: 15px;
             font-weight: 800;
-            color: #16324f;
+            letter-spacing: 0.02em;
+        }
+
+        .dashboard-hero__title {
+            margin: 0 0 14px;
+            font-size: 54px;
+            line-height: 1.03;
+            font-weight: 800;
+            color: #162033;
             animation: welcomeRise 0.8s ease-out;
         }
 
-        .dashboard-welcome__text {
+        .dashboard-hero__text {
             margin: 0;
-            max-width: 700px;
-            font-size: 16px;
-            color: #4b637b;
+            max-width: 560px;
+            font-size: 21px;
+            line-height: 1.7;
+            color: #42526b;
             animation: welcomeRise 1s ease-out;
         }
 
-        .dashboard-profile-card {
+        .dashboard-hero__stats {
             position: relative;
-            overflow: hidden;
-            min-height: 233px;
-            border-radius: 24px;
-            padding: 26px;
-            background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 55%, #38bdf8 100%);
-            color: #fff;
-            box-shadow: 0 24px 50px rgba(37, 99, 235, 0.24);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            margin-bottom: 15px;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 18px;
+            margin-top: 46px;
         }
 
-        .dashboard-profile-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 30px 56px rgba(37, 99, 235, 0.28);
-        }
-
-        .dashboard-profile-card__avatar {
-            width: 74px;
-            height: 74px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255,255,255,0.18);
-            border: 1px solid rgba(255,255,255,0.25);
-            font-size: 28px;
-            margin-bottom: 18px;
-        }
-
-        .dashboard-profile-card__btn {
-            display: inline-block;
-            margin-top: 12px;
-            padding: 10px 18px;
-            border-radius: 999px;
-            background: #fff;
-            color: #1d4ed8;
-            font-weight: 700;
+        .dashboard-hero-stat {
+            display: block;
+            padding: 22px 24px 18px;
+            border-left: 1px solid rgba(148, 163, 184, 0.22);
+            background: rgba(255, 255, 255, 0.26);
+            backdrop-filter: blur(8px);
+            transform-origin: top center;
+            animation: statDropSpin 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
             text-decoration: none !important;
-            box-shadow: 0 14px 30px rgba(15, 23, 42, 0.14);
+            transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .dashboard-hero-stat:hover,
+        .dashboard-hero-stat:focus {
+            transform: translateY(-4px);
+            background: rgba(255, 255, 255, 0.36);
+            box-shadow: 0 18px 34px rgba(15, 23, 42, 0.10);
+        }
+
+        .dashboard-hero-stat:nth-child(1) {
+            animation-delay: 0.08s;
+        }
+
+        .dashboard-hero-stat:nth-child(2) {
+            animation-delay: 0.18s;
+        }
+
+        .dashboard-hero-stat:nth-child(3) {
+            animation-delay: 0.28s;
+        }
+
+        .dashboard-hero-stat:nth-child(4) {
+            animation-delay: 0.38s;
+        }
+
+        .dashboard-hero-stat__value {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 28px;
+            line-height: 1;
+            font-weight: 800;
+            color: #111827;
+            text-shadow: 0 1px 0 rgba(255,255,255,0.2);
+        }
+
+        .dashboard-hero-stat__label {
+            color: #334155;
+            font-size: 15px;
+            line-height: 1.6;
         }
 
         @keyframes welcomeFloat {
@@ -169,10 +242,65 @@ $studentInitials='R';
             0% { opacity: 0; transform: translateY(16px); }
             100% { opacity: 1; transform: translateY(0); }
         }
+
+        @keyframes statDropSpin {
+            0% {
+                opacity: 0;
+                transform: translateY(-42px) rotateX(70deg) rotateZ(-6deg) scale(0.92);
+            }
+            60% {
+                opacity: 1;
+                transform: translateY(10px) rotateX(-10deg) rotateZ(2deg) scale(1.02);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) rotateX(0deg) rotateZ(0deg) scale(1);
+            }
+        }
+
+        @media (max-width: 991px) {
+            .dashboard-shell {
+                padding: 16px;
+                border-radius: 28px;
+            }
+
+            .dashboard-hero {
+                min-height: auto;
+                padding: 26px 24px 24px;
+            }
+
+            .dashboard-hero__title {
+                font-size: 40px;
+            }
+
+            .dashboard-hero__text {
+                font-size: 18px;
+            }
+
+            .dashboard-hero__stats {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+        }
+
+        @media (max-width: 767px) {
+            .dashboard-hero__title {
+                font-size: 32px;
+            }
+
+            .dashboard-hero__text {
+                font-size: 16px;
+            }
+
+            .dashboard-hero__stats,
+            .dashboard-hero__stats {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 
 </head>
-<body>
+<body class="dashboard-page">
       <!------MENU SECTION START-->
 <?php include('includes/header.php');?>
 <!-- MENU SECTION END-->
@@ -186,44 +314,13 @@ $studentInitials='R';
 
         </div>
 
-        <div class="dashboard-welcome">
-            <div class="dashboard-welcome__content">
-                <h2 class="dashboard-welcome__title">Welcome, <?php echo htmlentities($studentName);?></h2>
-                <p class="dashboard-welcome__text">Your library dashboard is ready. Track reading, orders, requests, and open your profile quickly from here.</p>
-            </div>
-        </div>
-
-             <div class="row">
-
-<div class="col-md-4 col-sm-4 col-xs-12">
-<div class="dashboard-profile-card">
-    <div class="dashboard-profile-card__avatar"><?php echo htmlentities($studentInitials);?></div>
-    <h3 style="margin-top:0;"><?php echo htmlentities($studentName);?></h3>
-    <p style="opacity:0.92;"><?php echo htmlentities($studentEmail);?></p>
-    <p>Open your profile to update account details whenever you need.</p>
-    <a href="my-profile.php" class="dashboard-profile-card__btn"><i class="fa fa-user"></i> Open Profile</a>
-</div>
-</div>
-
-<a href="listed-books.php">
-<div class="col-md-4 col-sm-4 col-xs-6">
- <div class="alert alert-success back-widget-set text-center">
- <i class="fa fa-book fa-5x"></i>
 <?php 
 $sql ="SELECT id from tblbooks ";
 $query = $dbh -> prepare($sql);
 $query->execute();
 $results=$query->fetchAll(PDO::FETCH_OBJ);
 $listdbooks=$query->rowCount();
-?>
-<h3><?php echo htmlentities($listdbooks);?></h3>
-Books Listed
-</div></div></a>
-             
-               <div class="col-md-4 col-sm-4 col-xs-6">
-                      <div class="alert alert-warning back-widget-set text-center">
-                            <i class="fa fa-recycle fa-5x"></i>
-<?php 
+
 $rsts=0;
 $sql2 ="SELECT id from tblissuedbookdetails where StudentID=:sid and (RetrunStatus=:rsts || RetrunStatus is null || RetrunStatus='')";
 $query2 = $dbh -> prepare($sql2);
@@ -232,38 +329,13 @@ $query2->bindParam(':rsts',$rsts,PDO::PARAM_STR);
 $query2->execute();
 $results2=$query2->fetchAll(PDO::FETCH_OBJ);
 $returnedbooks=$query2->rowCount();
-?>
-
-                            <h3><?php echo htmlentities($returnedbooks);?></h3>
-                          Books Not Returned Yet
-                        </div>
-                    </div>
-
-<?php 
 
 $ret =$dbh -> prepare("SELECT id from tblissuedbookdetails where StudentID=:sid");
 $ret->bindParam(':sid',$sid,PDO::PARAM_STR);
 $ret->execute();
 $results22=$ret->fetchAll(PDO::FETCH_OBJ);
 $totalissuedbook=$ret->rowCount();
-?>
 
-
-<a href="issued-books.php">
-<div class="col-md-4 col-sm-4 col-xs-6">
- <div class="alert alert-success back-widget-set text-center">
- <i class="fa fa-book fa-5x"></i>
-      <h3><?php echo htmlentities($totalissuedbook);?></h3>
-Total Issued Books
-</div></div></a>
-
-
-
-
-
-        </div>    
-        <div class="row">
-<?php
 $cartQuery=$dbh->prepare("SELECT COALESCE(SUM(Quantity),0) AS cartItems FROM tblcart WHERE StudentId=:sid");
 $cartQuery->bindParam(':sid',$sid,PDO::PARAM_STR);
 $cartQuery->execute();
@@ -280,29 +352,34 @@ $requestQuery->bindParam(':sid',$sid,PDO::PARAM_STR);
 $requestQuery->execute();
 $pendingRequestCount=$requestQuery->rowCount();
 ?>
-<a href="cart.php">
-<div class="col-md-4 col-sm-4 col-xs-6">
- <div class="alert alert-info back-widget-set text-center">
- <i class="fa fa-shopping-cart fa-5x"></i>
-      <h3><?php echo htmlentities($cartItems);?></h3>
-Cart Items
-</div></div></a>
 
-<a href="my-orders.php">
-<div class="col-md-4 col-sm-4 col-xs-6">
- <div class="alert alert-success back-widget-set text-center">
- <i class="fa fa-credit-card fa-5x"></i>
-      <h3><?php echo htmlentities($orderCount);?></h3>
-My Orders
-</div></div></a>
+        <div class="dashboard-shell">
+        <div class="dashboard-hero">
+            <div class="dashboard-hero__content">
+                <span class="dashboard-kicker">Our Track Record</span>
+                <h2 class="dashboard-hero__title">A smarter reading hub for every visit.</h2>
+                <p class="dashboard-hero__text">Track issued books, orders, returns, cart activity, and pending requests from one clean dashboard built for daily library use.</p>
+            </div>
+            <div class="dashboard-hero__stats">
+                <a href="listed-books.php" class="dashboard-hero-stat">
+                    <span class="dashboard-hero-stat__value js-count-up" data-target="<?php echo (int)$listdbooks; ?>" data-suffix="+">0+</span>
+                    <span class="dashboard-hero-stat__label">Books available in the catalog</span>
+                </a>
+                <a href="issued-books.php" class="dashboard-hero-stat">
+                    <span class="dashboard-hero-stat__value js-count-up" data-target="<?php echo (int)$totalissuedbook; ?>">0</span>
+                    <span class="dashboard-hero-stat__label">Books you have already issued</span>
+                </a>
+                <a href="my-orders.php" class="dashboard-hero-stat">
+                    <span class="dashboard-hero-stat__value js-count-up" data-target="<?php echo (int)$orderCount; ?>">0</span>
+                    <span class="dashboard-hero-stat__label">Orders placed from your account</span>
+                </a>
+                <a href="book-requests.php" class="dashboard-hero-stat">
+                    <span class="dashboard-hero-stat__value js-count-up" data-target="<?php echo (int)$pendingRequestCount; ?>">0</span>
+                    <span class="dashboard-hero-stat__label">Requests waiting for approval</span>
+                </a>
+            </div>
+        </div>
 
-<a href="book-requests.php">
-<div class="col-md-4 col-sm-4 col-xs-6">
- <div class="alert alert-warning back-widget-set text-center">
- <i class="fa fa-clock-o fa-5x"></i>
-      <h3><?php echo htmlentities($pendingRequestCount);?></h3>
-Pending Requests
-</div></div></a>
         </div>
     </div>
     </div>
@@ -316,6 +393,43 @@ Pending Requests
     <script src="assets/js/bootstrap.js"></script>
       <!-- CUSTOM SCRIPTS  -->
     <script src="assets/js/custom.js"></script>
+    <script type="text/javascript">
+    (function () {
+        var counters=document.querySelectorAll('.js-count-up');
+        var duration=1400;
+
+        function animateCounter(counter, index) {
+            var target=parseInt(counter.getAttribute('data-target'), 10) || 0;
+            var suffix=counter.getAttribute('data-suffix') || '';
+            var startTime=null;
+
+            function step(timestamp) {
+                if (!startTime) {
+                    startTime=timestamp;
+                }
+
+                var progress=Math.min((timestamp - startTime) / duration, 1);
+                var eased=1 - Math.pow(1 - progress, 3);
+                var current=Math.round(target * eased);
+                counter.textContent=current + suffix;
+
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                } else {
+                    counter.textContent=target + suffix;
+                }
+            }
+
+            window.setTimeout(function () {
+                window.requestAnimationFrame(step);
+            }, index * 120);
+        }
+
+        for (var i=0; i<counters.length; i++) {
+            animateCounter(counters[i], i);
+        }
+    })();
+    </script>
 </body>
 </html>
 <?php } ?>

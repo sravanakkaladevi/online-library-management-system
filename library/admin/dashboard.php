@@ -18,27 +18,19 @@ else{?>
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
         <![endif]-->
     <title>Online Library Management System | Admin Dash Board</title>
-    <!-- BOOTSTRAP CORE STYLE  -->
     <link href="assets/css/bootstrap.css" rel="stylesheet" />
-    <!-- FONT AWESOME STYLE  -->
     <link href="assets/css/font-awesome.css" rel="stylesheet" />
-    <!-- CUSTOM STYLE  -->
     <link href="assets/css/style.css" rel="stylesheet" />
-    <!-- GOOGLE FONT -->
     <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
 </head>
 <body>
-      <!------MENU SECTION START-->
 <?php include('includes/header.php');?>
-<!-- MENU SECTION END-->
     <div class="content-wrapper">
          <div class="container">
         <div class="row pad-botm">
             <div class="col-md-12">
                 <h4 class="header-line">ADMIN DASHBOARD</h4>
-                
-                            </div>
-
+            </div>
         </div>
 
              <div class="row">
@@ -57,8 +49,6 @@ $listdbooks=$query->rowCount();
 Books Listed
 </div></div></a>
 
-            
-       
              <a href="manage-issued-books.php">
                <div class="col-md-3 col-sm-3 col-xs-6">
                       <div class="alert alert-warning back-widget-set text-center">
@@ -111,11 +101,7 @@ Authors Listed
 </div></a>
 </div>
 
-
-
  <div class="row">
-
-
 
  <a href="manage-categories.php">            
 <div class="col-md-3 col-sm-3 rscol-xs-6">
@@ -178,21 +164,12 @@ $refundPendingOrders=$query8->rowCount();
                            Refund Pending
                         </div>
                     </div></a>
-             
-
         </div>             
-            
     </div>
     </div>
-     <!-- CONTENT-WRAPPER SECTION END-->
 <?php include('includes/footer.php');?>
-      <!-- FOOTER SECTION END-->
-    <!-- JAVASCRIPT FILES PLACED AT THE BOTTOM TO REDUCE THE LOADING TIME  -->
-    <!-- CORE JQUERY  -->
     <script src="assets/js/jquery-1.10.2.js"></script>
-    <!-- BOOTSTRAP SCRIPTS  -->
     <script src="assets/js/bootstrap.js"></script>
-      <!-- CUSTOM SCRIPTS  -->
     <script src="assets/js/custom.js"></script>
 </body>
 </html>

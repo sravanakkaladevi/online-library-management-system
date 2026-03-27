@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>Online Library Management System | Order Details</title>
+    <link href="assets/css/bootstrap.css" rel="stylesheet" />
+    <link href="assets/css/font-awesome.css" rel="stylesheet" />
+    <link href="assets/css/style.css" rel="stylesheet" />
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
+</head>
+<body>
+<div class="navbar navbar-inverse set-radius-zero" >
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" >
+
+                    <img src="assets/img/logo.png" />
+                </a>
+
+            </div>
+ 
+            <div class="right-div">
+                <a href="logout.php" class="btn btn-danger pull-right">LOG ME OUT</a>
+            </div>
+                    </div>
+    </div>
+    <!-- LOGO HEADER END-->
+    
+<section class="menu-section">
+        <div class="container">
+            <div class="row ">
+                <div class="col-md-12">
+                    <div class="navbar-collapse collapse ">
+                        <ul id="menu-top" class="nav navbar-nav navbar-right">
+                            <li><a href="dashboard.php" class="menu-top-active">DASHBOARD</a></li>
+                            <li><a href="listed-books.php">Listed Books</a></li>
+                            <li><a href="issued-books.php">Issued Books</a></li>
+                            <li><a href="book-requests.php">Book Requests</a></li>
+                            <li><a href="cart.php">Cart</a></li>
+                             <li>
+                                <a href="#" class="dropdown-toggle" id="ddlmenuItem" data-toggle="dropdown"> Account <i class="fa fa-angle-down"></i></a>
+                                <ul class="dropdown-menu" role="menu" aria-labelledby="ddlmenuItem">
+                                    <li role="presentation"><a role="menuitem" tabindex="-1" href="my-profile.php">My Profile</a></li>
+                                    <li role="presentation"><a role="menuitem" tabindex="-1" href="my-orders.php">My Orders</a></li>
+                                     <li role="presentation"><a role="menuitem" tabindex="-1" href="change-password.php">Change Password</a></li>
+                                </ul>
+                            </li>
+
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+        <div class="content-wrapper">
+         <div class="container">
+        <div class="row pad-botm">
+            <div class="col-md-8">
+                <h4 class="header-line">Order Details</h4>
+            </div>
+            <div class="col-md-4 text-right">
+                <a href="my-orders.php" class="btn btn-default">Back to Orders</a>
+            </div>
+        </div>
+
+        <div class="row">
+                        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        Order Summary
+                    </div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <p><strong>Order Number:</strong> ORD20260314114016D8C7C1</p>
+                                <p><strong>Order Date:</strong> 2026-03-14 17:10:16</p>
+                            </div>
+                            <div class="col-md-4">
+                                <p><strong>Payment Method:</strong> demo_gateway</p>
+                                <p><strong>Payment Provider:</strong> Demo Gateway</p>
+                            </div>
+                            <div class="col-md-4">
+                                <p><strong>Payment Status:</strong> Paid</p>
+                                <p><strong>Order Status:</strong> Packed</p>
+                            </div>
+                        </div>
+                        <p><strong>Transaction ID:</strong> TXN20260314114016E1D8EF</p>
+                        <p><strong>Total Amount:</strong> Rs. 142.00</p>
+                        <p><strong>Order Note:</strong> Packed and ready for dispatch</p>
+                        <form method="post" style="margin-top:15px;">
+                            <button type="submit" name="cancel_order" class="btn btn-danger" onclick="return confirm('Cancel this order? Your money will be refunded shortly.');">Cancel Order</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Ordered Books
+                    </div>
+                    <div class="panel-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Book Name</th>
+                                        <th>Author</th>
+                                        <th>ISBN</th>
+                                        <th>Quantity</th>
+                                        <th>Unit Price</th>
+                                        <th>Line Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>1</td>
+                                        <td><a href="book-details.php?bookid=10">C++: The Complete Reference, 4th Edition</a></td>
+                                        <td>Herbert Schildt</td>
+                                        <td>007053246X</td>
+                                        <td>1</td>
+                                        <td>Rs. 142.00</td>
+                                        <td>Rs. 142.00</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+   <section class="footer-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                 Online Library Management System</a> 
+                </div>
+
+            </div>
+        </div>
+    </section>    <script src="assets/js/jquery-1.10.2.js"></script>
+    <script src="assets/js/bootstrap.js"></script>
+    <script src="assets/js/custom.js"></script>
+</body>
+</html>

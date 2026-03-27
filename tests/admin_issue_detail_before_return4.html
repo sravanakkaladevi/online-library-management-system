@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>Online Library Management System | Issued Book Details</title>
+    <link href="assets/css/bootstrap.css" rel="stylesheet" />
+    <link href="assets/css/font-awesome.css" rel="stylesheet" />
+    <link href="assets/css/style.css" rel="stylesheet" />
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
+</head>
+<body>
+<div class="navbar navbar-inverse set-radius-zero" >
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand">
+
+                    <img src="assets/img/logo.png" />
+                </a>
+
+            </div>
+
+            <div class="right-div">
+                <a href="logout.php" class="btn btn-danger pull-right">LOG ME OUT</a>
+            </div>
+        </div>
+    </div>
+    <!-- LOGO HEADER END-->
+    <section class="menu-section">
+        <div class="container">
+            <div class="row ">
+                <div class="col-md-12">
+                    <div class="navbar-collapse collapse ">
+                        <ul id="menu-top" class="nav navbar-nav navbar-right">
+                            <li><a href="dashboard.php" class="menu-top-active">DASHBOARD</a></li>
+                           
+                            <li>
+                                <a href="#" class="dropdown-toggle" id="ddlmenuItem" data-toggle="dropdown"> Categories <i class="fa fa-angle-down"></i></a>
+                                <ul class="dropdown-menu" role="menu" aria-labelledby="ddlmenuItem">
+                                    <li role="presentation"><a role="menuitem" tabindex="-1" href="add-category.php">Add Category</a></li>
+                                     <li role="presentation"><a role="menuitem" tabindex="-1" href="manage-categories.php">Manage Categories</a></li>
+                                </ul>
+                            </li>
+                            <li>
+                                <a href="#" class="dropdown-toggle" id="ddlmenuItem" data-toggle="dropdown"> Authors <i class="fa fa-angle-down"></i></a>
+                                <ul class="dropdown-menu" role="menu" aria-labelledby="ddlmenuItem">
+                                    <li role="presentation"><a role="menuitem" tabindex="-1" href="add-author.php">Add Author</a></li>
+                                     <li role="presentation"><a role="menuitem" tabindex="-1" href="manage-authors.php">Manage Authors</a></li>
+                                </ul>
+                            </li>
+ <li>
+                                <a href="#" class="dropdown-toggle" id="ddlmenuItem" data-toggle="dropdown"> Books <i class="fa fa-angle-down"></i></a>
+                                <ul class="dropdown-menu" role="menu" aria-labelledby="ddlmenuItem">
+                                    <li role="presentation"><a role="menuitem" tabindex="-1" href="add-book.php">Add Book</a></li>
+                                     <li role="presentation"><a role="menuitem" tabindex="-1" href="manage-books.php">Manage Books</a></li>
+                                </ul>
+                            </li>
+
+                           <li>
+                                <a href="#" class="dropdown-toggle" id="ddlmenuItem" data-toggle="dropdown"> Issue Books <i class="fa fa-angle-down"></i></a>
+                                <ul class="dropdown-menu" role="menu" aria-labelledby="ddlmenuItem">
+                                    <li role="presentation"><a role="menuitem" tabindex="-1" href="issue-book.php">Issue New Book</a></li>
+                                     <li role="presentation"><a role="menuitem" tabindex="-1" href="manage-issued-books.php">Manage Issued Books</a></li>
+                                     <li role="presentation"><a role="menuitem" tabindex="-1" href="manage-book-requests.php">Manage Book Requests</a></li>
+                                </ul>
+                            </li>
+                             <li><a href="reg-students.php">Reg Students</a></li>
+                    
+  <li><a href="change-password.php">Change Password</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+    <div class="content-wrapper">
+         <div class="container">
+        <div class="row pad-botm">
+            <div class="col-md-12">
+                <h4 class="header-line">Issued Book Details</h4>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-10 col-sm-6 col-xs-12 col-md-offset-1">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        Issued Book Details
+                    </div>
+                    <div class="panel-body">
+                        <form role="form" method="post">
+                            <h4>Student Details</h4>
+                            <hr />
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Student ID :</label>
+                                    SID009                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Student Name :</label>
+                                    test                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Student Email Id :</label>
+                                    test@gmail.com                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Student Contact No :</label>
+                                    2359874527                                </div>
+                            </div>
+
+                            <h4>Book Details</h4>
+                            <hr />
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Book Image :</label>
+                                    <img src="bookimg/5939d64655b4d2ae443830d73abc35b6.jpg" width="120">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Book Name :</label>
+                                    Murach&#039;s MySQL                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>ISBN :</label>
+                                    9350237695                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Book Issued Date :</label>
+                                    2026-03-14 16:52:19                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Return Request Status :</label>
+                                    <span style="color:#b8860b;">User requested return</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Return Request Date :</label>
+                                    2026-03-14 16:52:19                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Book Returned Date :</label>
+                                    2026-03-14 16:52:19                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Return Processed Date :</label>
+                                    --                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>Fine (in USD) :</label>
+                                    <input class="form-control" type="number" min="0" name="fine" id="fine" value="0" required />
+                                </div>
+                            </div>
+                            <button type="submit" name="return" id="submit" class="btn btn-info">Return Book</button>
+                            <a href="manage-issued-books.php" class="btn btn-default">Back</a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+   <section class="footer-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                 Online Library Management System 
+                </div>
+
+            </div>
+        </div>
+    </section>    <script src="assets/js/jquery-1.10.2.js"></script>
+    <script src="assets/js/bootstrap.js"></script>
+    <script src="assets/js/custom.js"></script>
+</body>
+</html>

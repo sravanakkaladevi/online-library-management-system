@@ -1114,7 +1114,7 @@ $query->execute();
 return (bool)$query->fetch(PDO::FETCH_ASSOC);
 }
 
-function canStudentReviewBook($dbh, $studentId, $bookId)
+function hasStudentIssuedBookForReview($dbh, $studentId, $bookId)
 {
 $studentId=trim((string)$studentId);
 $bookId=(int)$bookId;
@@ -1124,20 +1124,26 @@ return false;
 }
 
 $sql="SELECT 1
-FROM (
-SELECT BookId FROM tblissuedbookdetails WHERE StudentID=:issuedSid
-UNION ALL
-SELECT BookId FROM tblbookrequests WHERE StudentId=:requestSid AND Status IN (0,1,2)
-) interactions
-WHERE BookId=:bookid
+FROM tblissuedbookdetails
+WHERE StudentID=:sid AND BookId=:bookid
 LIMIT 1";
 $query=$dbh->prepare($sql);
-$query->bindValue(':issuedSid',$studentId,PDO::PARAM_STR);
-$query->bindValue(':requestSid',$studentId,PDO::PARAM_STR);
+$query->bindValue(':sid',$studentId,PDO::PARAM_STR);
 $query->bindValue(':bookid',$bookId,PDO::PARAM_INT);
 $query->execute();
-$hasIssueOrRequest=(bool)$query->fetch(PDO::FETCH_ASSOC);
-if($hasIssueOrRequest)
+return (bool)$query->fetch(PDO::FETCH_ASSOC);
+}
+
+function canStudentReviewBook($dbh, $studentId, $bookId)
+{
+$studentId=trim((string)$studentId);
+$bookId=(int)$bookId;
+if($studentId==='' || $bookId<=0)
+{
+return false;
+}
+
+if(hasStudentIssuedBookForReview($dbh, $studentId, $bookId))
 {
 return true;
 }
@@ -1207,7 +1213,7 @@ return array('success' => false, 'message' => 'Review text is too long. Keep it 
 
 if(!canStudentReviewBook($dbh, $studentId, $bookId))
 {
-return array('success' => false, 'message' => 'You can review this book after you request or issue it, or once your order is delivered and confirmed.');
+return array('success' => false, 'message' => 'You can review this book only after you rent it or after your order is delivered and confirmed.');
 }
 
 $existingReview=fetchStudentBookReview($dbh, $studentId, $bookId);
@@ -1278,7 +1284,9 @@ return array(
 function getPaymentStatusOptions()
 {
 return array(
+'pending_confirmation' => 'Pending Counter Confirmation',
 'paid' => 'Paid',
+'payment_rejected' => 'Offline Payment Not Approved',
 'refund_pending' => 'Refund Pending',
 'refunded' => 'Refunded',
 );

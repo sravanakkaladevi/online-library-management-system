@@ -168,6 +168,126 @@ $recommendedBooks=fetchRecommendedBooks($dbh, $sid, 4, $bookid);
             font-size: 16px;
             font-weight: 600;
         }
+
+        .review-rating-radio {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .review-rating-radio > input {
+            position: absolute;
+            appearance: none;
+        }
+
+        .review-rating-radio > label {
+            cursor: pointer;
+            font-size: 30px;
+            position: relative;
+            display: inline-block;
+            transition: transform 0.3s ease;
+            margin-bottom: 0;
+        }
+
+        .review-rating-radio > label > svg {
+            width: 1em;
+            height: 1em;
+            fill: #666;
+            transition: fill 0.3s ease;
+        }
+
+        .review-rating-radio > label:before,
+        .review-rating-radio > label:after {
+            content: "";
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background-color: #ff9e0b;
+            border-radius: 50%;
+            opacity: 0;
+            transform: scale(0);
+            transition: transform 0.4s ease, opacity 0.4s ease;
+            animation: particle-explosion 1s ease-out;
+        }
+
+        .review-rating-radio > label:before {
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%) scale(0);
+        }
+
+        .review-rating-radio > label:after {
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%) scale(0);
+        }
+
+        .review-rating-radio > label:hover:before,
+        .review-rating-radio > label:hover:after {
+            opacity: 1;
+            transform: translateX(-50%) scale(1.5);
+        }
+
+        .review-rating-radio > label:hover {
+            transform: scale(1.2);
+            animation: pulse 0.6s infinite alternate;
+        }
+
+        .review-rating-radio > label:hover > svg,
+        .review-rating-radio > label:hover ~ label > svg,
+        .review-rating-radio > input:checked ~ label > svg {
+            fill: #ff9e0b;
+            filter: drop-shadow(0 0 15px rgba(255, 158, 11, 0.9));
+        }
+
+        .review-rating-radio > label:hover > svg {
+            animation: shimmer 1s ease infinite alternate;
+        }
+
+        .review-rating-radio > input:checked + label {
+            animation: pulse 0.8s infinite alternate;
+        }
+
+        .review-rating-note {
+            margin-top: 10px;
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            100% {
+                transform: scale(1.1);
+            }
+        }
+
+        @keyframes particle-explosion {
+            0% {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+        }
+
+        @keyframes shimmer {
+            0% {
+                filter: drop-shadow(0 0 10px rgba(255, 158, 11, 0.5));
+            }
+            100% {
+                filter: drop-shadow(0 0 20px rgba(255, 158, 11, 1));
+            }
+        }
     </style>
 </head>
 <body>
@@ -332,12 +452,17 @@ $recommendedBooks=fetchRecommendedBooks($dbh, $sid, 4, $bookid);
                     <form method="post">
                         <div class="form-group">
                             <label>Your Rating</label>
-                            <select name="rating" class="form-control" required>
-                                <option value="">Choose rating</option>
+                            <div class="review-rating-radio">
 <?php for($ratingOption=5;$ratingOption>=1;$ratingOption--){ ?>
-                                <option value="<?php echo $ratingOption; ?>" <?php if($studentReview && (int)$studentReview['Rating']===$ratingOption){ echo 'selected'; } ?>><?php echo $ratingOption; ?> Star<?php if($ratingOption>1){ echo 's'; } ?></option>
+                                <input value="<?php echo $ratingOption; ?>" name="rating" type="radio" id="rating-<?php echo $ratingOption; ?>" <?php if($studentReview && (int)$studentReview['Rating']===$ratingOption){ echo 'checked'; } ?> required />
+                                <label title="<?php echo $ratingOption; ?> star<?php if($ratingOption>1){ echo 's'; } ?>" for="rating-<?php echo $ratingOption; ?>">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" aria-hidden="true">
+                                        <path d="M316.9 18C311.6 7 300.4 0 288.1 0s-23.4 7-28.8 18L195 150.3 51.4 171.5c-12 1.8-22 10.2-25.7 21.7s-.7 24.2 7.9 32.7L137.8 329 113.2 474.7c-2 12 3 24.2 12.9 31.3s23 8 33.8 2.3l128.3-68.5 128.3 68.5c10.8 5.7 23.9 4.9 33.8-2.3s14.9-19.3 12.9-31.3L438.5 329 542.7 225.9c8.6-8.5 11.7-21.2 7.9-32.7s-13.7-19.9-25.7-21.7L381.2 150.3 316.9 18z"></path>
+                                    </svg>
+                                </label>
 <?php } ?>
-                            </select>
+                            </div>
+                            <p class="review-rating-note">Animated rating is available only after you rent this book or after your purchase is delivered.</p>
                         </div>
                         <div class="form-group">
                             <label>Your Review</label>
@@ -346,7 +471,7 @@ $recommendedBooks=fetchRecommendedBooks($dbh, $sid, 4, $bookid);
                         <button type="submit" name="save_review" class="btn btn-primary"><?php echo $studentReview ? 'Update Review' : 'Submit Review'; ?></button>
                     </form>
 <?php } else { ?>
-                    <div class="alert alert-info" style="margin-bottom:0;">Rate and review becomes available after you request or issue this book, or once your order is delivered.</div>
+                    <div class="alert alert-info" style="margin-bottom:0;">Rate and review becomes available only after you rent this book or once your order is delivered and confirmed.</div>
 <?php } ?>
                 </div>
             </div>

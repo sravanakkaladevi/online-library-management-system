@@ -22,6 +22,74 @@ body {
     --user-theme-color: #2563eb;
     --user-theme-soft: rgba(37, 99, 235, 0.16);
 }
+
+body.has-animated-cursor,
+body.has-animated-cursor a,
+body.has-animated-cursor button,
+body.has-animated-cursor input,
+body.has-animated-cursor select,
+body.has-animated-cursor textarea,
+body.has-animated-cursor label {
+    cursor: none !important;
+}
+
+.cursor-dot,
+.cursor-ring {
+    position: fixed;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    opacity: 0;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: opacity 0.2s ease, transform 0.18s ease, width 0.18s ease, height 0.18s ease, border-color 0.18s ease, background-color 0.18s ease;
+}
+
+.cursor-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--user-theme-color);
+    box-shadow: 0 0 18px rgba(37, 99, 235, 0.38);
+}
+
+.cursor-ring {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 2px solid var(--user-theme-color);
+    box-shadow: 0 0 24px rgba(37, 99, 235, 0.24);
+    background: rgba(255,255,255,0.08);
+}
+
+body.cursor-active .cursor-dot,
+body.cursor-active .cursor-ring {
+    opacity: 1;
+}
+
+body.cursor-hovering .cursor-ring {
+    width: 48px;
+    height: 48px;
+    background: var(--user-theme-soft);
+    box-shadow: 0 0 28px rgba(37, 99, 235, 0.28);
+}
+
+@media (max-width: 991px), (pointer: coarse) {
+    body.has-animated-cursor,
+    body.has-animated-cursor a,
+    body.has-animated-cursor button,
+    body.has-animated-cursor input,
+    body.has-animated-cursor select,
+    body.has-animated-cursor textarea,
+    body.has-animated-cursor label {
+        cursor: auto !important;
+    }
+
+    .cursor-dot,
+    .cursor-ring {
+        display: none !important;
+    }
+}
 .set-radius-zero {
     border-radius:0px;
     -moz-border-radius:0px;
@@ -31,6 +99,41 @@ body {
     margin-top: 40px;
     min-height:800px;
     padding-bottom:90px;
+    position: relative;
+    z-index: 5;
+}
+
+.content-wrapper .container,
+.content-wrapper .panel,
+.content-wrapper .panel-heading,
+.content-wrapper .panel-body,
+.content-wrapper .table-responsive,
+.content-wrapper .dataTables_wrapper,
+.content-wrapper .btn,
+.content-wrapper button,
+.content-wrapper a,
+.content-wrapper input,
+.content-wrapper select,
+.content-wrapper textarea {
+    position: relative;
+    z-index: 6;
+    pointer-events: auto;
+}
+
+body[class*="admin"] .content-wrapper .btn,
+body[class*="admin"] .content-wrapper button,
+body[class*="admin"] .content-wrapper a,
+body[class*="admin"] .content-wrapper input,
+body[class*="admin"] .content-wrapper select,
+body[class*="admin"] .content-wrapper textarea,
+body.admin-dashboard-page .content-wrapper .btn,
+body.admin-dashboard-page .content-wrapper button,
+body.admin-dashboard-page .content-wrapper a,
+body.admin-dashboard-page .content-wrapper input,
+body.admin-dashboard-page .content-wrapper select,
+body.admin-dashboard-page .content-wrapper textarea {
+    z-index: 3000;
+    pointer-events: auto;
 }
 .header-line {
     font-weight:900;
@@ -100,7 +203,7 @@ body {
 
 #menu-top > li.menu-top-logout-item {
     margin-left: auto;
-    padding-left: 12px;
+    padding-left: 28px;
     flex-shrink: 0;
 }
 
@@ -127,7 +230,7 @@ body {
     flex-wrap: nowrap;
     align-items: center;
     justify-content: flex-start;
-    gap: 2px;
+    gap: 8px;
     margin: 10px 0 0;
     overflow-x: visible;
     overflow-y: visible;
@@ -228,6 +331,21 @@ body {
     border-bottom: 1px solid #dbe8f5;
     box-shadow: inset 0 -1px 0 rgba(148, 163, 184, 0.12);
     width: 100%;
+    position: relative;
+    z-index: 1100;
+    overflow: visible;
+}
+
+.menu-section .container,
+.menu-section .row,
+.menu-section .col-md-12,
+.menu-section .navbar-collapse,
+.menu-section .nav,
+.menu-section .dropdown,
+.menu-section .open {
+    position: relative;
+    z-index: 2100;
+    overflow: visible;
 }
 
 .menu-top-active {
@@ -272,17 +390,26 @@ border: 1px solid black;
 }
 
 .dropdown-menu {
+    position: absolute;
     border: 1px solid #dbe8f5;
     border-radius: 16px;
     padding: 10px;
     margin-top: 12px;
     box-shadow: 0 22px 45px rgba(15, 23, 42, 0.12);
-    z-index: 1200;
+    z-index: 2200;
     min-width: 250px;
+}
+
+.dropdown-menu > li,
+.dropdown-menu > li > a {
+    position: relative;
+    z-index: 2300;
+    pointer-events: auto;
 }
 
 .account-menu-toggle {
     gap: 8px;
+    margin-right: 8px;
 }
 
 .account-avatar,
@@ -373,7 +500,7 @@ border: 1px solid black;
     }
 
     #menu-top > li.menu-top-logout-item {
-        margin-left: 12px;
+        margin-left: 18px;
         padding-left: 0;
     }
 

@@ -1,314 +1,88 @@
 # Online Library Management System
 
-A **PHP + MySQL based web application** that allows users to browse books, request book issues, manage orders, and process returns through an admin dashboard.
+A PHP and MySQL demo project for browsing books, placing orders, and managing library activity from an admin panel.
 
-This project has been updated to run smoothly with **modern PHP 8+ environments** using **PDO for MySQL connectivity**.
+## Clean Structure
 
-----
-
-# Tech Stack
-
-* PHP 8+
-* MySQL / MariaDB
-* HTML5
-* CSS3
-* JavaScript
-* Bootstrap
-
----
-
-# Features
-
-## User Features
-
-* User registration and login
-* Browse available books
-* View book details
-* Add books to cart
-* Checkout with demo payment flow
-* View order history
-* Cancel eligible orders
-* View issued books
-* Request book issue
-* Request book return
-* View issue request history
-* Preview books using preview links
-
----
-
-## Admin Features
-
-* Admin authentication
-* Manage categories
-* Manage authors
-* Add and edit books
-* Add preview links for books
-* Manage registered students
-* Activate or block students
-* Delete students when no issued book or order history exists
-* Issue books manually
-* Manage issued books
-* Process return requests and fines
-* Manage book issue requests
-* Manage orders
-
-### Order Status Management
-
-Admin can update order status to:
-
-* Placed
-* Packed
-* In Transit
-* Out For Delivery
-* Delivered
-* Cancelled
-
-### Payment Status Management
-
-Admin can update payment status to:
-
-* Paid
-* Refund Pending
-* Refunded
-
----
-
-# Project Structure
-
-```
-online-library-management-system
-│
-├── library/                 Application source code
-│   ├── admin/
-│   ├── includes/
-│   ├── css/
-│   ├── js/
-│   ├── index.php
-│   └── adminlogin.php
-│
-├── database/
-│   └── library.sql          Database dump file
-│
-├── screenshots/             Project UI screenshots
-│
-└── README.md
+```text
+Online-Library-Management-System-PHP/
+|-- library/                    Main PHP application
+|   |-- admin/
+|   |-- assets/
+|   |-- includes/
+|   |-- database/
+|   |   |-- library.sql
+|   |   `-- library-legacy.sql
+|   `-- screenshots/
+|-- scripts/
+|   `-- start_project.bat
+|-- tests/                      Saved manual test and preview files
+`-- README.md
 ```
 
----
+## Requirements
 
-# Requirements
+- PHP 8.0+
+- MySQL or MariaDB
+- `pdo_mysql` enabled in `php.ini`
 
-* PHP **8.0 or newer**
-* MySQL **8+** or MariaDB
-* PHP extension **pdo_mysql**
-* Web browser
+## Database Setup
 
----
+1. Create the database:
 
-# PHP Configuration
-
-Ensure the **pdo_mysql** extension is enabled in `php.ini`.
-
-Example configuration:
-
-```
-extension_dir="ext"
-extension=pdo_mysql
-```
-
-Restart PHP or restart the PHP built-in server after making changes.
-
----
-
-# Database Setup
-
-## Step 1 — Create Database
-
-```
+```sql
 CREATE DATABASE library;
 ```
 
-## Step 2 — Import Database
+2. Import the main dump:
 
-Example command:
-
-```
-mysql -u root -p library < database/library.sql
+```bash
+mysql -u root -p library < library/database/library.sql
 ```
 
----
+`library/database/library-legacy.sql` is kept only as an older backup dump.
 
-# Database Configuration
+## Run the Project
 
-Update database credentials in the following files:
+Fastest option:
 
-```
-library/includes/config.php
-library/admin/includes/config.php
-```
-
-Example configuration:
-
-```php
-$host="localhost";
-$dbname="library";
-$username="root";
-$password="";
+```text
+scripts\start_project.bat
 ```
 
----
+Manual option:
 
-# Run Project Locally
-
-Open **PowerShell** or **Command Prompt**:
-
-```
-cd C:\Users\srava\Downloads\Online-Library-Management-System-PHP\Online-Library-Management-System-PHP\library
+```powershell
+cd C:\Users\srava\Downloads\Online-Library-Management-System-PHP\library
 php -S localhost:8000
 ```
 
-Then open in browser.
+Then open:
 
-User Panel:
+- User panel: `http://localhost:8000/`
+- Admin login: `http://localhost:8000/adminlogin.php`
 
-```
-http://localhost:8000/
-```
+## Config Files
 
-Admin Login:
+Update database credentials in:
 
-```
-http://localhost:8000/adminlogin.php
-```
+- `library/includes/config.php`
+- `library/admin/includes/config.php`
 
----
+## Demo Credentials
 
-# Demo Login Credentials
+Admin:
 
-### Admin
-
-```
+```text
 Username: admin
 Password: Test@123
 ```
 
-### User
+User:
 
-```
+```text
 Email: test@gmail.com
 Password: Test@123
 ```
 
-⚠ These credentials are for **demo purposes only**.
-
----
-
-# Book Preview Feature
-
-Admins can attach preview links to books.
-
-Supported preview links:
-
-* Google Drive preview links
-* Direct document preview links
-
-Example:
-
-```
-https://drive.google.com/file/d/FILE_ID/view
-```
-
-When a preview link exists:
-
-* Users see **Preview Book** on the book list
-* Users see **Preview Book** on the book details page
-* The book opens in an embedded preview viewer
-
----
-
-# Order Workflow
-
-## User
-
-1. Add books to cart
-2. Checkout with demo payment
-3. View orders in **My Orders**
-4. Cancel orders while status is **Placed** or **Packed**
-5. Cancelled orders show **Refund Pending**
-
----
-
-## Admin
-
-1. Open **Manage Orders**
-2. Update order status
-3. Update payment status
-4. Add order notes if required
-
----
-
-# Return Workflow
-
-## User
-
-1. Open **Issued Books**
-2. Click **Request Return**
-3. Status becomes **Return Requested**
-
----
-
-## Admin
-
-1. Open **Manage Issued Books**
-2. View issued book details
-3. Enter fine if required
-4. Click **Return Book**
-
----
-
-# Screenshots
-
-### Admin Dashboard
-
-![Admin Dashboard](screenshots/admin-dashboard.png)
-
-### Book List
-
-![Book List](screenshots/book-list.png)
-
-### Book Details
-
-![Book Details](screenshots/book-details.png)
-
-### Cart Page
-
-![Cart Page](screenshots/cart-page.png)
-
-### Issued Books
-
-![Issued Books](screenshots/issued-books.png)
-
----
-
-# Important Notes
-
-* Payment system is currently **demo only**
-* No real payment gateway integration
-* Order cancellation marks payment as **Refund Pending**
-* Book stock is calculated using issued copies and sold copies
-
----
-
-# Future Improvements
-
-* Integrate real payment gateway (Razorpay / Stripe)
-* Replace MD5 hashing with `password_hash()` and `password_verify()`
-* Add email notifications for order updates
-* Add PDF preview upload support
-* Improve UI with modern frontend frameworks
-
----
-
-# License
-
-This project is intended for **educational and learning purposes**.
+These credentials are for demo use only.

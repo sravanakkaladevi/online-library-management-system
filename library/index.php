@@ -8,9 +8,9 @@ header('location:dashboard.php');
 exit;
 }
 
+$loginError='';
 if(isset($_POST['login']))
 {
-
 $email=$_POST['emailid'];
 $password=md5($_POST['password']);
 $sql ="SELECT EmailId,Password,StudentId,Status FROM tblstudents WHERE EmailId=:email and Password=:password";
@@ -32,125 +32,223 @@ exit;
 } else {
 unset($_SESSION['stdid']);
 unset($_SESSION['login']);
-echo "<script>alert('Your Account Has been blocked .Please contact admin');</script>";
-
+$loginError='Your account has been blocked. Please contact admin.';
 }
 }
 
-} 
-
+}
 else{
-echo "<script>alert('Invalid Details');</script>";
+$loginError='Invalid email or password.';
 }
 }
-
 ?>
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="" />
-    <meta name="author" content="" />
-    <title>Online Library Management System | </title>
-    <!-- BOOTSTRAP CORE STYLE  -->
-    <link href="assets/css/bootstrap.css" rel="stylesheet" />
-    <!-- FONT AWESOME STYLE  -->
-    <link href="assets/css/font-awesome.css" rel="stylesheet" />
-    <!-- CUSTOM STYLE  -->
-    <link href="assets/css/style.css" rel="stylesheet" />
-    <!-- GOOGLE FONT -->
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animated User Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+          font-family: "Quicksand", sans-serif;
+        }
 
+        body {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          min-height: 100vh;
+          background:
+            radial-gradient(circle at top left, rgba(37, 99, 235, 0.22), transparent 32%),
+            radial-gradient(circle at bottom right, rgba(14, 165, 233, 0.18), transparent 34%),
+            #111;
+          width: 100%;
+          overflow: hidden;
+        }
+
+        .ring {
+          position: relative;
+          width: 500px;
+          height: 500px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+
+        .ring i {
+          position: absolute;
+          inset: 0;
+          border: 2px solid #fff;
+          transition: 0.5s;
+        }
+
+        .ring i:nth-child(1) {
+          border-radius: 38% 62% 63% 37% / 41% 44% 56% 59%;
+          animation: animate 6s linear infinite;
+        }
+
+        .ring i:nth-child(2) {
+          border-radius: 41% 44% 56% 59%/38% 62% 63% 37%;
+          animation: animate 4s linear infinite;
+        }
+
+        .ring i:nth-child(3) {
+          border-radius: 41% 44% 56% 59%/38% 62% 63% 37%;
+          animation: animate2 10s linear infinite;
+        }
+
+        .ring:hover i {
+          border: 6px solid var(--clr);
+          filter: drop-shadow(0 0 20px var(--clr));
+        }
+
+        @keyframes animate {
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
+        }
+
+        @keyframes animate2 {
+          0% {
+            transform: rotate(360deg);
+          }
+          100% {
+            transform: rotate(0deg);
+          }
+        }
+
+        .login {
+          position: absolute;
+          width: 300px;
+          height: 100%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          flex-direction: column;
+          gap: 20px;
+        }
+
+        .login h2 {
+          font-size: 2em;
+          color: #fff;
+        }
+
+        .login .inputBx {
+          position: relative;
+          width: 100%;
+        }
+
+        .login .inputBx input {
+          position: relative;
+          width: 100%;
+          padding: 12px 20px;
+          background: transparent;
+          border: 2px solid #fff;
+          border-radius: 40px;
+          font-size: 1.05em;
+          color: #fff;
+          box-shadow: none;
+          outline: none;
+        }
+
+        .login .inputBx input[type="submit"] {
+          width: 100%;
+          background: linear-gradient(45deg, #2563eb, #38bdf8);
+          border: none;
+          cursor: pointer;
+          color: #fff;
+          font-weight: 700;
+        }
+
+        .login .inputBx input::placeholder {
+          color: rgba(255, 255, 255, 0.75);
+        }
+
+        .login .links {
+          position: relative;
+          width: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+          padding: 0 6px;
+        }
+
+        .login .links a {
+          color: #fff;
+          text-decoration: none;
+          font-size: 13px;
+        }
+
+        .login-error {
+          width: 100%;
+          padding: 10px 14px;
+          border-radius: 18px;
+          background: rgba(239, 68, 68, 0.18);
+          border: 1px solid rgba(248, 113, 113, 0.45);
+          color: #fff;
+          text-align: center;
+          font-size: 13px;
+        }
+
+        .login-note {
+          width: 100%;
+          text-align: center;
+          color: rgba(255,255,255,0.84);
+          font-size: 13px;
+          line-height: 1.7;
+        }
+
+        @media only screen and (max-width: 560px) {
+          .ring {
+            width: 360px;
+            height: 360px;
+          }
+
+          .login {
+            width: 280px;
+          }
+        }
+    </style>
 </head>
 <body>
-    <!------MENU SECTION START-->
-<?php include('includes/header.php');?>
-<!-- MENU SECTION END-->
-<div class="content-wrapper">
-<div class="container">
-<!--Slider---->
-     <div class="row">
-              <div class="col-md-10 col-sm-8 col-xs-12 col-md-offset-1">
-                    <div id="carousel-example" class="carousel slide slide-bdr" data-ride="carousel" >
-                    <div class="carousel-inner">
-                        <div class="item active">
-                            <img src="assets/img/1.jpg" alt="" />
-                        </div>
-                        <div class="item">
-                            <img src="assets/img/2.jpg" alt="" />
-                        </div>
-                        <div class="item">
-                            <img src="assets/img/3.jpg" alt="" /> 
-                        </div>
-                    </div>
-                    <!--INDICATORS-->
-                     <ol class="carousel-indicators">
-                        <li data-target="#carousel-example" data-slide-to="0" class="active"></li>
-                        <li data-target="#carousel-example" data-slide-to="1"></li>
-                        <li data-target="#carousel-example" data-slide-to="2"></li>
-                    </ol>
-                    <!--PREVIUS-NEXT BUTTONS-->
-                     <a class="left carousel-control" href="#carousel-example" data-slide="prev">
-    <span class="glyphicon glyphicon-chevron-left"></span>
-  </a>
-  <a class="right carousel-control" href="#carousel-example" data-slide="next">
-    <span class="glyphicon glyphicon-chevron-right"></span>
-  </a>
-                </div>
-              </div>
-             </div>
-<hr />
-
-
-
-<div class="row pad-botm">
-<div class="col-md-12">
-<h4 class="header-line">USER LOGIN FORM</h4>
-</div>
-</div>
- <a name="ulogin"></a>            
-<!--LOGIN PANEL START-->           
-<div class="row">
-<div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3" >
-<div class="panel panel-info">
-<div class="panel-heading">
- LOGIN FORM
-</div>
-<div class="panel-body">
-<form role="form" method="post">
-
-<div class="form-group">
-<label>Enter Email id</label>
-<input class="form-control" type="text" name="emailid" required autocomplete="off" />
-</div>
-<div class="form-group">
-<label>Password</label>
-<input class="form-control" type="password" name="password" required autocomplete="off"  />
-<p class="help-block"><a href="user-forgot-password.php">Forgot Password</a></p>
-</div>
-
-
-
- <button type="submit" name="login" class="btn btn-info">LOGIN </button> | <a href="signup.php">Not Register Yet</a>
-</form>
- </div>
-</div>
-</div>
-</div>  
-<!---LOGIN PABNEL END-->            
-             
- 
+<div class="ring">
+  <i style="--clr:#2563eb;"></i>
+  <i style="--clr:#38bdf8;"></i>
+  <i style="--clr:#7dd3fc;"></i>
+  <div class="login">
+    <h2>Login</h2>
+<?php if($loginError!==''){ ?>
+    <div class="login-error"><?php echo htmlentities($loginError);?></div>
+<?php } ?>
+    <form method="post" style="width:100%;">
+      <div class="inputBx">
+        <input type="text" name="emailid" placeholder="Email" required>
+      </div>
+      <div class="inputBx">
+        <input type="password" name="password" placeholder="Password" required>
+      </div>
+      <div class="inputBx">
+        <input type="submit" name="login" value="Sign in">
+      </div>
+    </form>
+    <div class="login-note">
+      User login opens the reader dashboard.<br>
+      Admin uses the separate admin login page.
     </div>
+    <div class="links">
+      <a href="user-forgot-password.php">Forget Password</a>
+      <a href="signup.php">Signup</a>
+      <a href="adminlogin.php">Admin Login</a>
     </div>
-     <!-- CONTENT-WRAPPER SECTION END-->
- <?php include('includes/footer.php');?>
-      <!-- FOOTER SECTION END-->
-    <script src="assets/js/jquery-1.10.2.js"></script>
-    <!-- BOOTSTRAP SCRIPTS  -->
-    <script src="assets/js/bootstrap.js"></script>
-      <!-- CUSTOM SCRIPTS  -->
-    <script src="assets/js/custom.js"></script>
-
+  </div>
+</div>
 </body>
 </html>

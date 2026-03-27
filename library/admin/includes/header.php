@@ -50,6 +50,7 @@
                                 <ul class="dropdown-menu" role="menu" aria-labelledby="ddlmenuItem">
                                     <li role="presentation"><a role="menuitem" tabindex="-1" href="issue-book.php"><i class="fa fa-send nav-icon"></i>Issue New Book</a></li>
                                      <li role="presentation"><a role="menuitem" tabindex="-1" href="manage-issued-books.php"><i class="fa fa-archive nav-icon"></i>Manage Issued Books</a></li>
+                                     <li role="presentation"><a role="menuitem" tabindex="-1" href="due-books.php"><i class="fa fa-calendar-times-o nav-icon"></i>Check Due Books</a></li>
                                      <li role="presentation"><a role="menuitem" tabindex="-1" href="manage-book-requests.php"><i class="fa fa-inbox nav-icon"></i>Manage Book Requests</a></li>
                                 </ul>
                             </li>

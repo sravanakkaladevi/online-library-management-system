@@ -53,6 +53,54 @@ function hexToRgba($hex, $alpha)
     return 'rgba(' . $r . ',' . $g . ',' . $b . ',' . $alpha . ')';
 }
 
+function normalizeUserProfileImagePath($path)
+{
+    $path = trim((string)$path);
+    if ($path === '') {
+        return '';
+    }
+
+    $path = str_replace('\\', '/', $path);
+    $path = preg_replace('#^\./+#', '', $path);
+    $path = ltrim($path, '/');
+
+    $profilePos = stripos($path, 'assets/img/profiles/');
+    if ($profilePos !== false) {
+        $path = substr($path, $profilePos);
+    }
+
+    if (stripos($path, 'library/') === 0) {
+        $path = substr($path, strlen('library/'));
+    }
+
+    return $path;
+}
+
+function resolveUserProfileImagePath($path)
+{
+    $relativePath = normalizeUserProfileImagePath($path);
+    if ($relativePath === '') {
+        return '';
+    }
+
+    $profilePrefix = 'assets/img/profiles/';
+    if (stripos($relativePath, $profilePrefix) !== 0) {
+        $profilePos = stripos($relativePath, $profilePrefix);
+        if ($profilePos === false) {
+            return '';
+        }
+
+        $relativePath = substr($relativePath, $profilePos);
+    }
+
+    $absolutePath = dirname(__DIR__) . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $relativePath);
+    if (!is_file($absolutePath)) {
+        return '';
+    }
+
+    return $relativePath;
+}
+
 function getUserPreferences($dbh, $studentId)
 {
     ensureUserPreferencesTable($dbh);
@@ -72,7 +120,7 @@ function getUserPreferences($dbh, $studentId)
             $preferences['ThemeColor'] = sanitizeThemeColor($row['ThemeColor']);
         }
         if (!empty($row['ProfileImage'])) {
-            $preferences['ProfileImage'] = (string)$row['ProfileImage'];
+            $preferences['ProfileImage'] = resolveUserProfileImagePath($row['ProfileImage']);
         }
     }
 
@@ -84,7 +132,7 @@ function saveUserPreferences($dbh, $studentId, $themeColor, $profileImage)
     ensureUserPreferencesTable($dbh);
 
     $themeColor = sanitizeThemeColor($themeColor);
-    $profileImage = trim((string)$profileImage);
+    $profileImage = resolveUserProfileImagePath($profileImage);
     if ($profileImage === '') {
         $profileImage = null;
     }
@@ -113,21 +161,39 @@ function handleUserProfileUpload($file, $studentId)
         return array('success' => false, 'path' => null, 'message' => 'Invalid image upload.');
     }
 
-    $finfo = finfo_open(FILEINFO_MIME_TYPE);
-    $mimeType = $finfo ? finfo_file($finfo, $file['tmp_name']) : '';
-    if ($finfo) {
-        finfo_close($finfo);
-    }
-
     $allowedTypes = array(
         'image/jpeg' => 'jpg',
         'image/png' => 'png',
         'image/gif' => 'gif',
         'image/webp' => 'webp'
     );
+    $allowedExtensions = array(
+        'jpg' => 'jpg',
+        'jpeg' => 'jpg',
+        'png' => 'png',
+        'gif' => 'gif',
+        'webp' => 'webp'
+    );
 
-    if (!isset($allowedTypes[$mimeType])) {
-        return array('success' => false, 'path' => null, 'message' => 'Use JPG, PNG, GIF, or WEBP for the profile picture.');
+    $mimeType = '';
+    if (function_exists('finfo_open')) {
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mimeType = $finfo ? (string)finfo_file($finfo, $file['tmp_name']) : '';
+        if ($finfo) {
+            finfo_close($finfo);
+        }
+    }
+
+    $originalExtension = strtolower(pathinfo((string)$file['name'], PATHINFO_EXTENSION));
+    $extension = '';
+    if ($mimeType !== '' && isset($allowedTypes[$mimeType])) {
+        $extension = $allowedTypes[$mimeType];
+    } elseif (isset($allowedExtensions[$originalExtension])) {
+        $extension = $allowedExtensions[$originalExtension];
+    }
+
+    if ($extension === '') {
+        return array('success' => false, 'path' => null, 'message' => 'Use JPG, JPEG, PNG, GIF, or WEBP for the profile picture.');
     }
 
     if (!empty($file['size']) && (int)$file['size'] > 2 * 1024 * 1024) {
@@ -139,7 +205,6 @@ function handleUserProfileUpload($file, $studentId)
         mkdir($uploadDir, 0777, true);
     }
 
-    $extension = $allowedTypes[$mimeType];
     $fileName = preg_replace('/[^A-Za-z0-9_-]/', '', (string)$studentId) . '_' . substr(md5(uniqid((string)$studentId, true)), 0, 12) . '.' . $extension;
     $absolutePath = $uploadDir . DIRECTORY_SEPARATOR . $fileName;
 
@@ -149,7 +214,7 @@ function handleUserProfileUpload($file, $studentId)
 
     return array(
         'success' => true,
-        'path' => 'assets/img/profiles/' . $fileName,
+        'path' => resolveUserProfileImagePath('assets/img/profiles/' . $fileName),
         'message' => ''
     );
 }

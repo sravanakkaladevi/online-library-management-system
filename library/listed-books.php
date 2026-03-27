@@ -205,6 +205,7 @@ $books=fetchCatalogBooks($dbh, $catalogFilters, $sid);
             right: 20px;
             bottom: 20px;
             z-index: 1040;
+            max-width: calc(100vw - 24px);
         }
 
         .recommended-slide-chatbot__toggle {
@@ -220,9 +221,10 @@ $books=fetchCatalogBooks($dbh, $catalogFilters, $sid);
         .recommended-slide-chatbot__panel {
             position: absolute;
             right: 0;
-            bottom: 58px;
-            width: 380px;
+            bottom: 72px;
+            width: 420px;
             max-width: calc(100vw - 30px);
+            max-height: calc(100vh - 150px);
             background: #fff;
             border: 1px solid #d9edf7;
             border-radius: 16px;
@@ -269,6 +271,9 @@ $books=fetchCatalogBooks($dbh, $catalogFilters, $sid);
 
         .recommended-slide-chatbot__body {
             padding: 18px;
+            max-height: calc(100vh - 290px);
+            overflow-y: auto;
+            overflow-x: hidden;
         }
 
         .recommended-slide-chatbot__body textarea {
@@ -301,9 +306,21 @@ $books=fetchCatalogBooks($dbh, $catalogFilters, $sid);
 
         .inline-chatbot-results {
             margin-top: 20px;
-            max-height: 320px;
+            max-height: 300px;
             overflow-y: auto;
+            overflow-x: hidden;
             padding-right: 4px;
+        }
+
+        .inline-chatbot-results .row {
+            margin-left: -8px;
+            margin-right: -8px;
+        }
+
+        .inline-chatbot-results .col-md-4,
+        .inline-chatbot-results .col-sm-6 {
+            padding-left: 8px;
+            padding-right: 8px;
         }
 
         .inline-chatbot-results .recommended-card {
@@ -345,6 +362,12 @@ $books=fetchCatalogBooks($dbh, $catalogFilters, $sid);
                 width: auto;
                 max-width: none;
                 left: 0;
+                bottom: 64px;
+                max-height: calc(100vh - 110px);
+            }
+
+            .recommended-slide-chatbot__body {
+                max-height: calc(100vh - 230px);
             }
         }
     </style>

@@ -28,7 +28,7 @@ $chngpwd1 = $dbh->prepare($con);
 $chngpwd1-> bindParam(':email', $email, PDO::PARAM_STR);
 $chngpwd1-> bindParam(':newpassword', $newpassword, PDO::PARAM_STR);
 $chngpwd1->execute();
-$msg="Your Password succesfully changed";
+$msg="Your password was changed successfully";
 }
 else {
 $error="Your current password is wrong";  
@@ -122,7 +122,7 @@ Change Password
 <input class="form-control"  type="password" name="confirmpassword" autocomplete="off" required  />
 </div>
 
- <button type="submit" name="change" class="btn btn-info">Chnage </button> 
+ <button type="submit" name="change" class="btn btn-info">Change Password</button> 
 </form>
  </div>
 </div>

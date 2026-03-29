@@ -19,7 +19,76 @@
 body {
     font-family: 'Open Sans', sans-serif;
     line-height:28px;
-   
+    --user-theme-color: #2563eb;
+    --user-theme-soft: rgba(37, 99, 235, 0.16);
+}
+
+body.has-animated-cursor,
+body.has-animated-cursor a,
+body.has-animated-cursor button,
+body.has-animated-cursor input,
+body.has-animated-cursor select,
+body.has-animated-cursor textarea,
+body.has-animated-cursor label {
+    cursor: none !important;
+}
+
+.cursor-dot,
+.cursor-ring {
+    position: fixed;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    opacity: 0;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: opacity 0.2s ease, transform 0.18s ease, width 0.18s ease, height 0.18s ease, border-color 0.18s ease, background-color 0.18s ease;
+}
+
+.cursor-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--user-theme-color);
+    box-shadow: 0 0 18px rgba(37, 99, 235, 0.38);
+}
+
+.cursor-ring {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 2px solid var(--user-theme-color);
+    box-shadow: 0 0 24px rgba(37, 99, 235, 0.24);
+    background: rgba(255,255,255,0.08);
+}
+
+body.cursor-active .cursor-dot,
+body.cursor-active .cursor-ring {
+    opacity: 1;
+}
+
+body.cursor-hovering .cursor-ring {
+    width: 48px;
+    height: 48px;
+    background: var(--user-theme-soft);
+    box-shadow: 0 0 28px rgba(37, 99, 235, 0.28);
+}
+
+@media (max-width: 991px), (pointer: coarse) {
+    body.has-animated-cursor,
+    body.has-animated-cursor a,
+    body.has-animated-cursor button,
+    body.has-animated-cursor input,
+    body.has-animated-cursor select,
+    body.has-animated-cursor textarea,
+    body.has-animated-cursor label {
+        cursor: auto !important;
+    }
+
+    .cursor-dot,
+    .cursor-ring {
+        display: none !important;
+    }
 }
 .set-radius-zero {
     border-radius:0px;

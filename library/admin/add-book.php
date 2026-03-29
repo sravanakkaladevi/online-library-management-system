@@ -193,9 +193,9 @@ foreach($results as $result)
 </div>
 <div class="col-md-6">  
  <div class="form-group">
- <label>Preview Link</label>
+ <label>Online Book Link</label>
  <input class="form-control" type="url" name="previewlink" autocomplete="off" placeholder="Paste Google Drive share link or PDF link" />
- <p class="help-block">Optional. Example: Google Drive file share link. Users will get a Preview button.</p>
+ <p class="help-block">Optional. Example: Google Drive file share link. Students can read online only after buying the book and getting admin payment approval.</p>
  </div>
 </div>
 <div class="col-md-12"> 

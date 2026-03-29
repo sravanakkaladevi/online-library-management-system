@@ -1,0 +1,175 @@
+{
+    "generated_at": "2026-03-29T06:58:35+00:00",
+    "books": [
+        {
+            "id": 1,
+            "BookName": "PHP And MySql programming",
+            "CatId": 5,
+            "AuthorId": 1,
+            "ISBNNumber": "222333",
+            "CategoryName": "Technology",
+            "AuthorName": "Anuj kumar"
+        },
+        {
+            "id": 3,
+            "BookName": "physics",
+            "CatId": 6,
+            "AuthorId": 4,
+            "ISBNNumber": "1111",
+            "CategoryName": "Science",
+            "AuthorName": "HC Verma"
+        },
+        {
+            "id": 5,
+            "BookName": "Murach's MySQL",
+            "CatId": 5,
+            "AuthorId": 1,
+            "ISBNNumber": "9350237695",
+            "CategoryName": "Technology",
+            "AuthorName": "Anuj kumar"
+        },
+        {
+            "id": 6,
+            "BookName": "WordPress for Beginners 2022: A Visual Step-by-Step Guide to Mastering WordPress",
+            "CatId": 5,
+            "AuthorId": 10,
+            "ISBNNumber": "B019MO3WCM",
+            "CategoryName": "Technology",
+            "AuthorName": "Dr. Andy Williams"
+        },
+        {
+            "id": 7,
+            "BookName": "WordPress Mastery Guide:",
+            "CatId": 5,
+            "AuthorId": 11,
+            "ISBNNumber": "B09NKWH7NP",
+            "CategoryName": "Technology",
+            "AuthorName": "Kyle Hill"
+        },
+        {
+            "id": 8,
+            "BookName": "Rich Dad Poor Dad: What the Rich Teach Their Kids About Money That the Poor and Middle Class Do Not",
+            "CatId": 8,
+            "AuthorId": 12,
+            "ISBNNumber": "B07C7M8SX9",
+            "CategoryName": "General",
+            "AuthorName": "Robert T. Kiyosak"
+        },
+        {
+            "id": 9,
+            "BookName": "The Girl Who Drank the Moon",
+            "CatId": 8,
+            "AuthorId": 13,
+            "ISBNNumber": "1848126476",
+            "CategoryName": "General",
+            "AuthorName": "Kelly Barnhill"
+        },
+        {
+            "id": 10,
+            "BookName": "C++: The Complete Reference, 4th Edition",
+            "CatId": 5,
+            "AuthorId": 14,
+            "ISBNNumber": "007053246X",
+            "CategoryName": "Technology",
+            "AuthorName": "Herbert Schildt"
+        },
+        {
+            "id": 11,
+            "BookName": "ASP.NET Core 5 for Beginners",
+            "CatId": 9,
+            "AuthorId": 11,
+            "ISBNNumber": "GBSJ36344563",
+            "CategoryName": "Programming",
+            "AuthorName": "Kyle Hill"
+        },
+        {
+            "id": 12,
+            "BookName": "Python Packages",
+            "CatId": 9,
+            "AuthorId": 16,
+            "ISBNNumber": "0367687771",
+            "CategoryName": "Programming",
+            "AuthorName": " Tiffany Timbers"
+        },
+        {
+            "id": 13,
+            "BookName": "you have reached sam ",
+            "CatId": 4,
+            "AuthorId": 17,
+            "ISBNNumber": "130324862003",
+            "CategoryName": "Romantic",
+            "AuthorName": "samuel"
+        },
+        {
+            "id": 14,
+            "BookName": "Algorithms to Live By",
+            "CatId": 10,
+            "AuthorId": 18,
+            "ISBNNumber": "DRV2026001",
+            "CategoryName": "E-Books",
+            "AuthorName": "Shared Drive Library"
+        },
+        {
+            "id": 15,
+            "BookName": "Code",
+            "CatId": 10,
+            "AuthorId": 18,
+            "ISBNNumber": "DRV2026002",
+            "CategoryName": "E-Books",
+            "AuthorName": "Shared Drive Library"
+        },
+        {
+            "id": 16,
+            "BookName": "Digital Minimalism",
+            "CatId": 10,
+            "AuthorId": 18,
+            "ISBNNumber": "DRV2026003",
+            "CategoryName": "E-Books",
+            "AuthorName": "Shared Drive Library"
+        },
+        {
+            "id": 17,
+            "BookName": "Human Compatible",
+            "CatId": 10,
+            "AuthorId": 18,
+            "ISBNNumber": "DRV2026004",
+            "CategoryName": "E-Books",
+            "AuthorName": "Shared Drive Library"
+        },
+        {
+            "id": 18,
+            "BookName": "Life 3.0",
+            "CatId": 10,
+            "AuthorId": 18,
+            "ISBNNumber": "DRV2026005",
+            "CategoryName": "E-Books",
+            "AuthorName": "Shared Drive Library"
+        }
+    ],
+    "reviews": [
+        {
+            "StudentId": "SID016",
+            "BookId": 3,
+            "Rating": 4,
+            "ReviewText": "good for reading",
+            "CreatedDate": "2026-03-29 12:25:44",
+            "UpdatedDate": null
+        },
+        {
+            "StudentId": "SID016",
+            "BookId": 10,
+            "Rating": 5,
+            "ReviewText": "very nice content",
+            "CreatedDate": "2026-03-26 13:13:37",
+            "UpdatedDate": null
+        },
+        {
+            "StudentId": "SID016",
+            "BookId": 12,
+            "Rating": 5,
+            "ReviewText": "Good book",
+            "CreatedDate": "2026-03-27 20:15:59",
+            "UpdatedDate": null
+        }
+    ]
+}

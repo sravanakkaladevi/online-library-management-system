@@ -63,11 +63,63 @@ $loginError='Invalid email or password.';
           align-items: center;
           min-height: 100vh;
           background:
-            radial-gradient(circle at top left, rgba(37, 99, 235, 0.22), transparent 32%),
-            radial-gradient(circle at bottom right, rgba(14, 165, 233, 0.18), transparent 34%),
+            linear-gradient(rgba(6, 10, 18, 0.72), rgba(6, 10, 18, 0.72)),
+            radial-gradient(circle at top left, rgba(37, 99, 235, 0.18), transparent 34%),
+            radial-gradient(circle at bottom right, rgba(14, 165, 233, 0.16), transparent 36%),
+            url("assets/img/library-hero.jpg") center center / cover no-repeat,
             #111;
           width: 100%;
           overflow: hidden;
+        }
+
+        body.has-animated-cursor,
+        body.has-animated-cursor a,
+        body.has-animated-cursor button,
+        body.has-animated-cursor input,
+        body.has-animated-cursor select,
+        body.has-animated-cursor textarea,
+        body.has-animated-cursor label {
+          cursor: none !important;
+        }
+
+        .cursor-dot,
+        .cursor-ring {
+          position: fixed;
+          top: 0;
+          left: 0;
+          pointer-events: none;
+          opacity: 0;
+          z-index: 9999;
+          transform: translate(-50%, -50%);
+          transition: opacity 0.2s ease, transform 0.18s ease, width 0.18s ease, height 0.18s ease;
+        }
+
+        .cursor-dot {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          background: #2563eb;
+          box-shadow: 0 0 18px rgba(37, 99, 235, 0.45);
+        }
+
+        .cursor-ring {
+          width: 34px;
+          height: 34px;
+          border-radius: 50%;
+          border: 2px solid #2563eb;
+          box-shadow: 0 0 24px rgba(37, 99, 235, 0.25);
+          background: rgba(255,255,255,0.08);
+        }
+
+        body.cursor-active .cursor-dot,
+        body.cursor-active .cursor-ring {
+          opacity: 1;
+        }
+
+        body.cursor-hovering .cursor-ring {
+          width: 48px;
+          height: 48px;
+          background: rgba(37, 99, 235, 0.16);
         }
 
         .ring {
@@ -216,6 +268,23 @@ $loginError='Invalid email or password.';
             width: 280px;
           }
         }
+
+        @media (pointer: coarse) {
+          body.has-animated-cursor,
+          body.has-animated-cursor a,
+          body.has-animated-cursor button,
+          body.has-animated-cursor input,
+          body.has-animated-cursor select,
+          body.has-animated-cursor textarea,
+          body.has-animated-cursor label {
+            cursor: auto !important;
+          }
+
+          .cursor-dot,
+          .cursor-ring {
+            display: none !important;
+          }
+        }
     </style>
 </head>
 <body>
@@ -244,11 +313,61 @@ $loginError='Invalid email or password.';
       Admin uses the separate admin login page.
     </div>
     <div class="links">
-      <a href="user-forgot-password.php">Forget Password</a>
+      <a href="user-forgot-password.php">Forgot Password</a>
       <a href="signup.php">Signup</a>
       <a href="adminlogin.php">Admin Login</a>
     </div>
   </div>
 </div>
+<script>
+(function () {
+  if (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) {
+    return;
+  }
+  var body = document.body;
+  var dot = document.createElement('div');
+  var ring = document.createElement('div');
+  dot.className = 'cursor-dot';
+  ring.className = 'cursor-ring';
+  body.classList.add('has-animated-cursor');
+  body.appendChild(dot);
+  body.appendChild(ring);
+  var ringX = window.innerWidth / 2;
+  var ringY = window.innerHeight / 2;
+  var mouseX = ringX;
+  var mouseY = ringY;
+  document.addEventListener('mousemove', function (event) {
+    mouseX = event.clientX;
+    mouseY = event.clientY;
+    dot.style.left = mouseX + 'px';
+    dot.style.top = mouseY + 'px';
+    body.classList.add('cursor-active');
+  });
+  document.addEventListener('mouseenter', function () {
+    body.classList.add('cursor-active');
+  });
+  document.addEventListener('mouseleave', function () {
+    body.classList.remove('cursor-active', 'cursor-hovering');
+  });
+  document.addEventListener('mouseover', function (event) {
+    if (event.target.closest('a, button, input, select, textarea, label')) {
+      body.classList.add('cursor-hovering');
+    }
+  });
+  document.addEventListener('mouseout', function (event) {
+    if (event.target.closest('a, button, input, select, textarea, label')) {
+      body.classList.remove('cursor-hovering');
+    }
+  });
+  function animateRing() {
+    ringX += (mouseX - ringX) * 0.18;
+    ringY += (mouseY - ringY) * 0.18;
+    ring.style.left = ringX + 'px';
+    ring.style.top = ringY + 'px';
+    window.requestAnimationFrame(animateRing);
+  }
+  window.requestAnimationFrame(animateRing);
+}());
+</script>
 </body>
 </html>

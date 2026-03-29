@@ -72,7 +72,8 @@ INSERT INTO `tblauthors` (`id`, `AuthorName`, `creationDate`, `UpdationDate`) VA
 (12, 'Robert T. Kiyosak', '2023-12-31 21:23:03', '2025-01-07 06:18:50'),
 (13, 'Kelly Barnhill', '2023-12-31 21:23:03', '2025-01-07 06:18:50'),
 (14, 'Herbert Schildt', '2023-12-31 21:23:03', '2025-01-07 06:18:50'),
-(16, ' Tiffany Timbers', '2025-01-07 06:55:54', NULL);
+(16, ' Tiffany Timbers', '2025-01-07 06:55:54', NULL),
+(17, 'Shared Drive Library', '2026-03-28 08:17:00', NULL);
 
 -- --------------------------------------------------------
 
@@ -99,17 +100,22 @@ CREATE TABLE `tblbooks` (
 -- Dumping data for table `tblbooks`
 --
 
-INSERT INTO `tblbooks` (`id`, `BookName`, `CatId`, `AuthorId`, `ISBNNumber`, `BookPrice`, `bookImage`, `isIssued`, `RegDate`, `UpdationDate`, `bookQty`) VALUES
-(1, 'PHP And MySql programming', 5, 1, '222333', 20.00, '1efecc0ca822e40b7b673c0d79ae943f.jpg', 0, '2024-01-02 01:23:03', '2025-01-14 07:08:11', 10),
-(3, 'physics', 6, 4, '1111', 15.00, 'dd8267b57e0e4feee5911cb1e1a03a79.jpg', NULL, '2024-01-02 01:23:03', '2025-01-13 11:11:01', 10),
-(5, 'Murach\'s MySQL', 5, 1, '9350237695', 455.00, '5939d64655b4d2ae443830d73abc35b6.jpg', NULL, '2024-01-02 01:23:03', '2025-01-13 11:11:01', 20),
-(6, 'WordPress for Beginners 2022: A Visual Step-by-Step Guide to Mastering WordPress', 5, 10, 'B019MO3WCM', 100.00, '144ab706ba1cb9f6c23fd6ae9c0502b3.jpg', NULL, '2024-01-02 01:23:03', '2025-01-13 11:05:35', 15),
-(7, 'WordPress Mastery Guide:', 5, 11, 'B09NKWH7NP', 53.00, '90083a56014186e88ffca10286172e64.jpg', NULL, '2024-01-02 01:23:03', '2025-01-13 11:05:39', 14),
-(8, 'Rich Dad Poor Dad: What the Rich Teach Their Kids About Money That the Poor and Middle Class Do Not', 8, 12, 'B07C7M8SX9', 120.00, '52411b2bd2a6b2e0df3eb10943a5b640.jpg', NULL, '2024-01-02 01:23:03', '2025-01-13 11:05:41', 5),
-(9, 'The Girl Who Drank the Moon', 8, 13, '1848126476', 200.00, 'f05cd198ac9335245e1fdffa793207a7.jpg', NULL, '2024-01-02 01:23:03', '2025-01-13 11:05:45', 1),
-(10, 'C++: The Complete Reference, 4th Edition', 5, 14, '007053246X', 142.00, '36af5de9012bf8c804e499dc3c3b33a5.jpg', NULL, '2024-01-02 01:23:03', '2025-01-13 11:11:01', 2),
-(11, 'ASP.NET Core 5 for Beginners', 9, 11, 'GBSJ36344563', 422.00, 'b1b6788016bbfab12cfd2722604badc9.jpg', NULL, '2024-01-02 01:23:03', '2025-01-13 11:11:01', 5),
-(12, 'Python Packages', 9, 16, '0367687771', 3034.00, 'ba719639def504c64ebac89cdd0d0a85.jpg', NULL, '2025-01-07 06:56:50', NULL, 25);
+INSERT INTO `tblbooks` (`id`, `BookName`, `CatId`, `AuthorId`, `ISBNNumber`, `BookPrice`, `bookImage`, `isIssued`, `RegDate`, `UpdationDate`, `bookQty`, `PreviewLink`) VALUES
+(1, 'PHP And MySql programming', 5, 1, '222333', 20.00, '1efecc0ca822e40b7b673c0d79ae943f.jpg', 0, '2024-01-02 01:23:03', '2025-01-14 07:08:11', 10, NULL),
+(3, 'physics', 6, 4, '1111', 15.00, 'dd8267b57e0e4feee5911cb1e1a03a79.jpg', NULL, '2024-01-02 01:23:03', '2025-01-13 11:11:01', 10, NULL),
+(5, 'Murach\'s MySQL', 5, 1, '9350237695', 455.00, '5939d64655b4d2ae443830d73abc35b6.jpg', NULL, '2024-01-02 01:23:03', '2025-01-13 11:11:01', 20, NULL),
+(6, 'WordPress for Beginners 2022: A Visual Step-by-Step Guide to Mastering WordPress', 5, 10, 'B019MO3WCM', 100.00, '144ab706ba1cb9f6c23fd6ae9c0502b3.jpg', NULL, '2024-01-02 01:23:03', '2025-01-13 11:05:35', 15, NULL),
+(7, 'WordPress Mastery Guide:', 5, 11, 'B09NKWH7NP', 53.00, '90083a56014186e88ffca10286172e64.jpg', NULL, '2024-01-02 01:23:03', '2025-01-13 11:05:39', 14, NULL),
+(8, 'Rich Dad Poor Dad: What the Rich Teach Their Kids About Money That the Poor and Middle Class Do Not', 8, 12, 'B07C7M8SX9', 120.00, '52411b2bd2a6b2e0df3eb10943a5b640.jpg', NULL, '2024-01-02 01:23:03', '2025-01-13 11:05:41', 5, NULL),
+(9, 'The Girl Who Drank the Moon', 8, 13, '1848126476', 200.00, 'f05cd198ac9335245e1fdffa793207a7.jpg', NULL, '2024-01-02 01:23:03', '2025-01-13 11:05:45', 1, NULL),
+(10, 'C++: The Complete Reference, 4th Edition', 5, 14, '007053246X', 142.00, '36af5de9012bf8c804e499dc3c3b33a5.jpg', NULL, '2024-01-02 01:23:03', '2025-01-13 11:11:01', 2, NULL),
+(11, 'ASP.NET Core 5 for Beginners', 9, 11, 'GBSJ36344563', 422.00, 'b1b6788016bbfab12cfd2722604badc9.jpg', NULL, '2024-01-02 01:23:03', '2025-01-13 11:11:01', 5, NULL),
+(12, 'Python Packages', 9, 16, '0367687771', 3034.00, 'ba719639def504c64ebac89cdd0d0a85.jpg', NULL, '2025-01-07 06:56:50', NULL, 25, NULL),
+(13, 'Algorithms to Live By', 10, 17, 'DRV2026001', 0.00, '1efecc0ca822e40b7b673c0d79ae943f.jpg', NULL, '2026-03-28 08:17:00', NULL, 5, 'https://drive.google.com/file/d/1Mp-Qxx6m_k3DZlnO9icctn-wXmlAbIYG/view?usp=sharing'),
+(14, 'Code', 10, 17, 'DRV2026002', 0.00, '1efecc0ca822e40b7b673c0d79ae943f.jpg', NULL, '2026-03-28 08:17:00', NULL, 5, 'https://drive.google.com/file/d/1k4f6dFWY_B94rXGd5Bsw5WCejAWGLTN_/view?usp=sharing'),
+(15, 'Digital Minimalism', 10, 17, 'DRV2026003', 0.00, '1efecc0ca822e40b7b673c0d79ae943f.jpg', NULL, '2026-03-28 08:17:00', NULL, 5, 'https://drive.google.com/file/d/1x4gFmpzjVtFvb0MwJ3EO-tZzgIjcuhzK/view?usp=sharing'),
+(16, 'Human Compatible', 10, 17, 'DRV2026004', 0.00, '1efecc0ca822e40b7b673c0d79ae943f.jpg', NULL, '2026-03-28 08:17:00', NULL, 5, 'https://drive.google.com/file/d/1-vQz3Wyc8A4Lnrvx7oOCHdfHtk0OuE1l/view?usp=sharing'),
+(17, 'Life 3.0', 10, 17, 'DRV2026005', 0.00, '1efecc0ca822e40b7b673c0d79ae943f.jpg', NULL, '2026-03-28 08:17:00', NULL, 5, 'https://drive.google.com/file/d/1O_DZhKXUt-JzE3lBx4dlqUFuQ7jiB4sw/view?usp=sharing');
 
 -- --------------------------------------------------------
 
@@ -135,7 +141,8 @@ INSERT INTO `tblcategory` (`id`, `CategoryName`, `Status`, `CreationDate`, `Upda
 (6, 'Science', 1, '2025-01-01 07:23:03', '2025-01-07 06:19:21'),
 (7, 'Management', 1, '2025-01-01 07:23:03', '2025-01-07 06:19:21'),
 (8, 'General', 1, '2025-01-01 07:23:03', '2025-01-07 06:19:21'),
-(9, 'Programming', 1, '2025-01-01 07:23:03', '2025-01-07 06:19:21');
+(9, 'Programming', 1, '2025-01-01 07:23:03', '2025-01-07 06:19:21'),
+(10, 'E-Books', 1, '2026-03-28 08:17:00', NULL);
 
 -- --------------------------------------------------------
 
@@ -374,19 +381,19 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT for table `tblauthors`
 --
 ALTER TABLE `tblauthors`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `tblbooks`
 --
 ALTER TABLE `tblbooks`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `tblcategory`
 --
 ALTER TABLE `tblcategory`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `tblissuedbookdetails`

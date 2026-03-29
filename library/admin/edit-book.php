@@ -175,9 +175,9 @@ continue;
 </div>
 <div class="col-md-6">
  <div class="form-group">
- <label>Preview Link</label>
+ <label>Online Book Link</label>
  <input class="form-control" type="url" name="previewlink" autocomplete="off" value="<?php echo htmlentities($result->PreviewLink);?>" placeholder="Paste Google Drive share link or PDF link" />
- <p class="help-block">Optional. Users will see a Preview button when this link is added.</p>
+ <p class="help-block">Optional. Students can read online only after buying the book and getting admin payment approval.</p>
  </div>
 </div>
 

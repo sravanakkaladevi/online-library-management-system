@@ -1,30 +1,51 @@
 # Online Library Management System
 
-A PHP and MySQL demo project for browsing books, placing orders, and managing library activity from an admin panel.
+A PHP, MySQL, and Python-based library platform for:
 
-## Clean Structure
+- home delivery book orders
+- counter issue requests
+- paid 1-year online reading access
+- admin approval flows
+- user ratings, reviews, and ML-assisted recommendations
+
+This README is text-only. Screenshots and images can be added later.
+
+## Main Features
+
+- User login, signup, profile, cart, checkout, and order tracking
+- Book listing, book details, issue request flow, and online preview access
+- Admin management for books, authors, categories, students, issued books, requests, orders, and reviews
+- Online 1-year rent request approval from admin
+- Ratings and reviews with recommendation support
+- Python training pipeline that exports ML recommendations for PHP to use
+
+## Project Structure
 
 ```text
 Online-Library-Management-System-PHP/
-|-- library/                    Main PHP application
+|-- library/
 |   |-- admin/
 |   |-- assets/
-|   |-- includes/
+|   |-- data/
 |   |-- database/
-|   |   |-- library.sql
-|   |   `-- library-legacy.sql
-|   `-- screenshots/
+|   |-- includes/
+|   |-- export_recommendation_data.php
+|   |-- index.php
+|   `-- adminlogin.php
 |-- scripts/
-|   `-- start_project.bat
-|-- tests/                      Saved manual test and preview files
+|   |-- start_project.bat
+|   |-- train_recommendations.bat
+|   `-- train_recommendations.py
+|-- tests/
 `-- README.md
 ```
 
 ## Requirements
 
-- PHP 8.0+
+- PHP 8.0 or later
 - MySQL or MariaDB
-- `pdo_mysql` enabled in `php.ini`
+- Python 3.10 or later
+- `pdo_mysql` enabled in PHP
 
 ## Database Setup
 
@@ -34,15 +55,19 @@ Online-Library-Management-System-PHP/
 CREATE DATABASE library;
 ```
 
-2. Import the main dump:
+2. Import the main SQL dump:
 
 ```bash
 mysql -u root -p library < library/database/library.sql
 ```
 
-`library/database/library-legacy.sql` is kept only as an older backup dump.
+3. If needed, run any maintenance scripts such as:
 
-## Run the Project
+```powershell
+php library/fix_db.php
+```
+
+## Run the App
 
 Fastest option:
 
@@ -53,16 +78,46 @@ scripts\start_project.bat
 Manual option:
 
 ```powershell
-cd C:\Users\srava\Downloads\Online-Library-Management-System-PHP\library
+cd library
 php -S localhost:8000
 ```
 
-Then open:
+Open:
 
 - User panel: `http://localhost:8000/`
 - Admin login: `http://localhost:8000/adminlogin.php`
 
-## Config Files
+## ML Recommendation Flow
+
+The recommendation setup uses Python for training and PHP for runtime display.
+
+1. PHP exports review and rating data:
+
+```powershell
+php library/export_recommendation_data.php
+```
+
+2. Python trains the recommendation model:
+
+```powershell
+python scripts/train_recommendations.py
+```
+
+3. Or run both together:
+
+```text
+scripts\train_recommendations.bat
+```
+
+The trained model is saved to:
+
+```text
+library/data/ml_recommendations.json
+```
+
+PHP reads this file and uses it for recommendation screens, with fallback logic when rating data is still too small.
+
+## Important Config Files
 
 Update database credentials in:
 
@@ -85,4 +140,22 @@ Email: test@gmail.com
 Password: Test@123
 ```
 
-These credentials are for demo use only.
+## Admin Modules
+
+The admin panel includes:
+
+- Manage Books
+- Manage Authors
+- Manage Categories
+- Manage Issued Books
+- Manage Book Requests
+- Manage Orders
+- Online Rent Requests
+- Manage Reviews
+- Registered Students
+
+## Notes
+
+- Online reading remains locked until admin approves payment.
+- More user ratings improve ML recommendation quality.
+- Review and recommendation data can be retrained anytime with the training script.

@@ -107,8 +107,10 @@ $alreadyIssued=isset($activeIssuedBookIds[$bookid]);
 $requestPending=isset($pendingRequestBookIds[$bookid]);
 $cartQty=isset($cartBookQuantities[$bookid]) ? (int)$cartBookQuantities[$bookid] : 0;
 $canAddToCart=(int)$book['availableQty']>$cartQty;
-$hasPreview=hasBookPreview($book['PreviewLink']);
-$previewOpenUrl=$hasPreview ? getBookPreviewOpenUrl($book['PreviewLink']) : '';
+$hasOnlineReading=hasBookOnlineReading($book['PreviewLink']);
+$previewOpenUrl=$hasOnlineReading ? getBookPreviewOpenUrl($book['PreviewLink']) : '';
+$hasPaidOnlineAccess=$hasOnlineReading ? hasStudentPaidOnlineAccessToBook($dbh, $sid, $bookid) : false;
+$hasPendingOnlineApproval=$hasOnlineReading ? hasStudentPendingOnlineAccessApproval($dbh, $sid, $bookid) : false;
 $canReviewBook=canStudentReviewBook($dbh, $sid, $bookid);
 $studentReview=fetchStudentBookReview($dbh, $sid, $bookid);
 $bookReviews=fetchBookReviews($dbh, $bookid, 8);
@@ -332,12 +334,15 @@ $recommendedBooks=fetchRecommendedBooks($dbh, $sid, 4, $bookid);
                     <div class="panel-body text-center">
                         <img src="admin/bookimg/<?php echo htmlentities($book['bookImage']);?>" class="img-responsive" style="margin:0 auto; max-height:320px;" alt="<?php echo htmlentities($book['BookName']);?>" />
                         <hr />
-<?php if($hasPreview){ ?>
-                        <a href="preview-book.php?bookid=<?php echo htmlentities($bookid);?>" class="btn btn-info btn-block">Preview Book</a>
-                        <a href="<?php echo htmlentities($previewOpenUrl);?>" target="_blank" rel="noopener noreferrer" class="btn btn-default btn-block" style="margin-top:10px;">Open Preview Link</a>
+<?php if($hasOnlineReading && $hasPaidOnlineAccess){ ?>
+                        <a href="preview-book.php?bookid=<?php echo htmlentities($bookid);?>" class="btn btn-info btn-block">Read Online</a>
+                        <a href="<?php echo htmlentities($previewOpenUrl);?>" target="_blank" rel="noopener noreferrer" class="btn btn-default btn-block" style="margin-top:10px;">Open Online Book Link</a>
+<?php } elseif($hasOnlineReading && $hasPendingOnlineApproval){ ?>
+                        <button type="button" class="btn btn-warning btn-block" disabled>Payment Approval Pending</button>
+                        <p style="margin-top:10px; margin-bottom:0;"><strong>Online Reading:</strong> Your payment is under admin review.</p>
 <?php } else { ?>
-                        <p><strong>Digital Preview:</strong> Preview link is not added yet.</p>
-                        <button type="button" class="btn btn-default btn-block" disabled>Preview Not Added</button>
+                        <p><strong>Online Reading:</strong> Online book link is not added yet.</p>
+                        <button type="button" class="btn btn-default btn-block" disabled>Online Book Not Added</button>
 <?php } ?>
                     </div>
                 </div>
@@ -361,7 +366,9 @@ $recommendedBooks=fetchRecommendedBooks($dbh, $sid, 4, $bookid);
                                 <p><strong>Currently Reading:</strong> <?php echo htmlentities($book['activeIssues']);?> people</p>
                                 <p><strong>Sold Copies:</strong> <?php echo htmlentities($book['soldQty']);?></p>
                                 <p><strong>In Your Cart:</strong> <?php echo htmlentities($cartQty);?></p>
-                                <p><strong>Preview:</strong> <?php echo $hasPreview ? 'Available' : 'Not Added'; ?></p>
+<?php if($hasOnlineReading){ ?>
+                                <p><strong>Online Reading:</strong> <?php echo $hasPaidOnlineAccess ? 'Unlocked' : ($hasPendingOnlineApproval ? 'Payment Approval Pending' : '1-Year Rent Available'); ?></p>
+<?php } ?>
                                 <p><strong>Rating:</strong> <?php echo htmlentities(number_format((float)$book['averageRating'],1));?> / 5 (<?php echo htmlentities($book['reviewCount']);?> reviews)</p>
                             </div>
                         </div>
@@ -417,22 +424,31 @@ $recommendedBooks=fetchRecommendedBooks($dbh, $sid, 4, $bookid);
                                 </form>
                             </div>
                             <div class="col-md-6">
-<?php if(!$alreadyIssued && !$requestPending && (int)$book['availableQty']>0){ ?>
-                                <form method="post">
+<?php if($canAddToCart && (int)$book['availableQty']>0 && !$hasPaidOnlineAccess && !$hasPendingOnlineApproval){ ?>
+                                <form method="post" action="checkout.php" style="margin:0;">
                                     <input type="hidden" name="bookid" value="<?php echo htmlentities($bookid);?>">
-                                    <div class="form-group">
-                                        <label>Issue Request</label>
-                                        <p class="form-control-static">Send this book to admin for approval and issue.</p>
-                                    </div>
-                                    <button type="submit" name="request_book" class="btn btn-primary">Request Book Issue</button>
+                                    <input type="hidden" name="order_type" value="read_online">
+                                    <button type="submit" name="read_online" class="btn btn-info btn-block">Rent Online (1 Year)</button>
                                 </form>
-<?php } elseif($alreadyIssued) { ?>
-                                <button type="button" class="btn btn-success" disabled>Already Issued</button>
-<?php } elseif($requestPending) { ?>
-                                <button type="button" class="btn btn-warning" disabled>Request Pending</button>
+<?php } elseif($hasPaidOnlineAccess) { ?>
+                                <button type="button" class="btn btn-success btn-block" disabled>Online Access Unlocked</button>
+<?php } elseif($hasPendingOnlineApproval) { ?>
+                                <button type="button" class="btn btn-warning btn-block" disabled>Payment Approval Pending</button>
 <?php } else { ?>
-                                <button type="button" class="btn btn-default" disabled>Issue Unavailable</button>
+                                <button type="button" class="btn btn-default btn-block" disabled>Read Online Unavailable</button>
 <?php } ?>
+                                <form method="post" style="margin:0; margin-top:10px;">
+                                    <input type="hidden" name="bookid" value="<?php echo htmlentities($bookid);?>">
+<?php if(!$alreadyIssued && !$requestPending && (int)$book['availableQty']>0){ ?>
+                                    <button type="submit" name="request_book" class="btn btn-primary btn-block">Request Book Issue</button>
+<?php } elseif($alreadyIssued) { ?>
+                                    <button type="button" class="btn btn-success btn-block" disabled>Already Issued</button>
+<?php } elseif($requestPending) { ?>
+                                    <button type="button" class="btn btn-warning btn-block" disabled>Request Pending</button>
+<?php } else { ?>
+                                    <button type="button" class="btn btn-default btn-block" disabled>Issue Unavailable</button>
+<?php } ?>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -445,7 +461,7 @@ $recommendedBooks=fetchRecommendedBooks($dbh, $sid, 4, $bookid);
                 <div class="col-md-6">
                     <h4 style="margin-top:0;">Ratings and Reviews</h4>
                     <p class="rating-summary"><?php echo htmlentities(number_format((float)$book['averageRating'],1));?> / 5 using <?php echo htmlentities($book['reviewCount']);?> reader reviews</p>
-                    <p style="margin-bottom:0;">Recommendations use a content-based text model: your past review keywords are compared with review text from other books to surface similar reads.</p>
+                    <p style="margin-bottom:0;">Recommendations now use a rating-based ML model first, then fall back to review-text similarity when rating history is still small.</p>
                 </div>
                 <div class="col-md-6">
 <?php if($canReviewBook){ ?>
@@ -493,7 +509,7 @@ $recommendedBooks=fetchRecommendedBooks($dbh, $sid, 4, $bookid);
             <div class="row">
                 <div class="col-md-12">
                     <h4 style="margin-top:0;">Recommended Next Reads</h4>
-                    <p>These suggestions are picked from your activity history, reader ratings, popularity, and text similarity from review content.</p>
+                    <p>These suggestions are picked from reader ratings and collaborative ML training, with fallback support from your activity history and review-text similarity.</p>
                 </div>
             </div>
             <div class="row">

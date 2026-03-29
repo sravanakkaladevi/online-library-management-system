@@ -315,6 +315,11 @@ function hasBookPreview($previewLink)
 return normalizeBookPreviewLink($previewLink)!=='';
 }
 
+function hasBookOnlineReading($previewLink)
+{
+return hasBookPreview($previewLink);
+}
+
 function getBookPreviewEmbedUrl($previewLink)
 {
 $previewLink=normalizeBookPreviewLink($previewLink);
@@ -357,6 +362,153 @@ return 'https://drive.google.com/file/d/' . $fileId . '/view';
 }
 
 return $previewLink;
+}
+
+function fetchStudentPurchasedBookStatusMap($dbh, $studentId)
+{
+$statusMap=array();
+$studentId=trim((string)$studentId);
+if($studentId==='')
+{
+return $statusMap;
+}
+
+$sql="SELECT tblorderitems.BookId,
+MAX(CASE WHEN tblorders.PaymentStatus='paid' AND tblorders.OrderStatus<>'cancelled' THEN 1 ELSE 0 END) AS hasPaidAccess,
+MAX(CASE WHEN tblorders.PaymentStatus='pending_confirmation' AND tblorders.OrderStatus<>'cancelled' THEN 1 ELSE 0 END) AS hasPendingApproval,
+MAX(CASE WHEN tblorders.PaymentStatus='payment_rejected' AND tblorders.OrderStatus<>'cancelled' THEN 1 ELSE 0 END) AS hasRejectedPayment
+FROM tblorderitems
+INNER JOIN tblorders ON tblorders.id=tblorderitems.OrderId
+WHERE tblorders.StudentId=:sid
+GROUP BY tblorderitems.BookId";
+$query=$dbh->prepare($sql);
+$query->bindValue(':sid',$studentId,PDO::PARAM_STR);
+$query->execute();
+$rows=$query->fetchAll(PDO::FETCH_ASSOC);
+foreach($rows as $row)
+{
+$statusMap[(int)$row['BookId']]=array(
+'hasPaidAccess' => ((int)$row['hasPaidAccess']===1),
+'hasPendingApproval' => ((int)$row['hasPendingApproval']===1),
+'hasRejectedPayment' => ((int)$row['hasRejectedPayment']===1),
+);
+}
+return $statusMap;
+}
+
+function hasStudentPaidOnlineAccessToBook($dbh, $studentId, $bookId)
+{
+$studentId=trim((string)$studentId);
+$bookId=(int)$bookId;
+if($studentId==='' || $bookId<=0)
+{
+return false;
+}
+
+$sql="SELECT 1
+FROM tblreadonlineaccess
+INNER JOIN tblorders ON tblorders.id=tblreadonlineaccess.OrderId
+WHERE tblorders.StudentId=:sid
+AND tblreadonlineaccess.BookId=:bookid
+AND tblorders.PaymentStatus='paid'
+AND tblorders.OrderType='read_online'
+AND tblorders.OrderStatus<>'cancelled'
+AND tblreadonlineaccess.ExpiryDate >= CURDATE()
+LIMIT 1";
+$query=$dbh->prepare($sql);
+$query->bindValue(':sid',$studentId,PDO::PARAM_STR);
+$query->bindValue(':bookid',$bookId,PDO::PARAM_INT);
+$query->execute();
+return (bool)$query->fetch(PDO::FETCH_ASSOC);
+}
+
+function hasStudentPendingOnlineAccessApproval($dbh, $studentId, $bookId)
+{
+$studentId=trim((string)$studentId);
+$bookId=(int)$bookId;
+if($studentId==='' || $bookId<=0)
+{
+return false;
+}
+
+$sql="SELECT 1
+FROM tblorderitems
+INNER JOIN tblorders ON tblorders.id=tblorderitems.OrderId
+WHERE tblorders.StudentId=:sid
+AND tblorderitems.BookId=:bookid
+AND tblorders.OrderType='read_online'
+AND tblorders.PaymentStatus='pending_confirmation'
+AND tblorders.OrderStatus<>'cancelled'
+LIMIT 1";
+$query=$dbh->prepare($sql);
+$query->bindValue(':sid',$studentId,PDO::PARAM_STR);
+$query->bindValue(':bookid',$bookId,PDO::PARAM_INT);
+$query->execute();
+return (bool)$query->fetch(PDO::FETCH_ASSOC);
+}
+
+function ensureReadOnlineAccessForOrder($dbh, $orderId)
+{
+$orderId=(int)$orderId;
+if($orderId<=0)
+{
+return array('success' => false, 'message' => 'Invalid online access order.');
+}
+
+$orderSql="SELECT tblorders.id,tblorders.OrderType,tblorders.PaymentStatus,tblorders.OrderStatus,
+tblorderitems.BookId,tblbooks.PreviewLink
+FROM tblorders
+INNER JOIN tblorderitems ON tblorderitems.OrderId=tblorders.id
+INNER JOIN tblbooks ON tblbooks.id=tblorderitems.BookId
+WHERE tblorders.id=:orderid
+ORDER BY tblorderitems.id ASC
+LIMIT 1";
+$orderQuery=$dbh->prepare($orderSql);
+$orderQuery->bindValue(':orderid',$orderId,PDO::PARAM_INT);
+$orderQuery->execute();
+$order=$orderQuery->fetch(PDO::FETCH_ASSOC);
+if(!$order)
+{
+return array('success' => false, 'message' => 'Order not found.');
+}
+
+if($order['OrderType']!=='read_online')
+{
+return array('success' => true, 'message' => 'Order is not an online access request.');
+}
+
+if($order['PaymentStatus']!=='paid' || $order['OrderStatus']==='cancelled')
+{
+return array('success' => false, 'message' => 'Online access can be created only after payment is approved.');
+}
+
+$accessCheckSql="SELECT id FROM tblreadonlineaccess WHERE OrderId=:orderId LIMIT 1";
+$accessCheckQuery=$dbh->prepare($accessCheckSql);
+$accessCheckQuery->bindValue(':orderId',$orderId,PDO::PARAM_INT);
+$accessCheckQuery->execute();
+$existingAccess=$accessCheckQuery->fetch(PDO::FETCH_ASSOC);
+if($existingAccess)
+{
+return array('success' => true, 'message' => 'Online access already exists.');
+}
+
+$previewLink=getBookPreviewOpenUrl($order['PreviewLink']);
+if($previewLink==='')
+{
+return array('success' => false, 'message' => 'This book does not have an online preview link.');
+}
+
+$expiryDate=date('Y-m-d', strtotime('+1 year'));
+$accessSql="INSERT INTO tblreadonlineaccess (OrderId, BookId, PdfLink, ExpiryDate)
+VALUES (:orderId, :bookId, :pdfLink, :expiryDate)";
+$accessQuery=$dbh->prepare($accessSql);
+$accessQuery->bindValue(':orderId',$orderId,PDO::PARAM_INT);
+$accessQuery->bindValue(':bookId',(int)$order['BookId'],PDO::PARAM_INT);
+$accessQuery->bindValue(':pdfLink',$previewLink,PDO::PARAM_STR);
+$accessQuery->bindValue(':expiryDate',$expiryDate,PDO::PARAM_STR);
+$accessQuery->execute();
+
+return array('success' => true, 'message' => 'Online access approved successfully.');
 }
 
 function calculateAvailableBookQty($bookQty, $activeIssues, $soldQty)
@@ -962,6 +1114,12 @@ return $books;
 
 function fetchRecommendedBooks($dbh, $studentId, $limit=4, $excludeBookId=0)
 {
+$mlRecommendedBooks=fetchMlRecommendedBooks($dbh, $studentId, $limit, $excludeBookId);
+if(!empty($mlRecommendedBooks))
+{
+return $mlRecommendedBooks;
+}
+
 $books=fetchCatalogBooks(
 $dbh,
 array(
@@ -978,6 +1136,185 @@ $books=array_slice($books, 0, $limit);
 }
 
 return $books;
+}
+
+function getMlRecommendationModelPath()
+{
+return dirname(__DIR__) . DIRECTORY_SEPARATOR . 'data' . DIRECTORY_SEPARATOR . 'ml_recommendations.json';
+}
+
+function loadMlRecommendationModel()
+{
+static $modelLoaded=false;
+static $model=array();
+
+if($modelLoaded)
+{
+return $model;
+}
+
+$modelLoaded=true;
+$path=getMlRecommendationModelPath();
+if(!is_file($path))
+{
+return $model;
+}
+
+$raw=@file_get_contents($path);
+if($raw===false || trim($raw)==='')
+{
+return $model;
+}
+
+$decoded=json_decode($raw, true);
+if(!is_array($decoded))
+{
+return $model;
+}
+
+$model=$decoded;
+return $model;
+}
+
+function fetchBooksByIdsPreservingOrder($dbh, $bookIds=array(), $studentId='', $excludeBookId=0)
+{
+$bookIds=array_values(array_unique(array_map('intval', $bookIds)));
+$bookIds=array_filter($bookIds, function($bookId) use ($excludeBookId) {
+return $bookId>0 && $bookId!==(int)$excludeBookId;
+});
+if(empty($bookIds))
+{
+return array();
+}
+
+$placeholders=array();
+$params=array();
+foreach($bookIds as $index => $bookId)
+{
+$key=':mlbook' . $index;
+$placeholders[]=$key;
+$params[$key]=$bookId;
+}
+
+$sql="SELECT tblbooks.BookName,tblcategory.CategoryName,tblauthors.AuthorName,tblbooks.ISBNNumber,
+tblbooks.BookPrice,tblbooks.id as bookid,tblbooks.bookImage,tblbooks.bookQty,tblbooks.PreviewLink,
+" . getInventorySelectSql() . "
+FROM tblbooks
+LEFT JOIN tblauthors ON tblauthors.id=tblbooks.AuthorId
+LEFT JOIN tblcategory ON tblcategory.id=tblbooks.CatId
+" . getInventoryIssueJoinSql('tblbooks') . "
+" . getInventoryOrderJoinSql('tblbooks') . "
+WHERE tblbooks.id IN (" . implode(',', $placeholders) . ")";
+$query=$dbh->prepare($sql);
+foreach($params as $key => $bookId)
+{
+$query->bindValue($key, $bookId, PDO::PARAM_INT);
+}
+$query->execute();
+$rows=$query->fetchAll(PDO::FETCH_ASSOC);
+
+$bookMap=array();
+foreach($rows as $row)
+{
+$row['availableQty']=calculateAvailableBookQty($row['bookQty'], $row['activeIssues'], $row['soldQty']);
+$bookMap[(int)$row['bookid']]=$row;
+}
+
+$orderedBooks=array();
+foreach($bookIds as $bookId)
+{
+if(isset($bookMap[$bookId]))
+{
+$orderedBooks[]=$bookMap[$bookId];
+}
+}
+
+attachReviewDataToBookRows($dbh, $orderedBooks, $studentId, $excludeBookId);
+return $orderedBooks;
+}
+
+function fetchMlRecommendedBooks($dbh, $studentId, $limit=4, $excludeBookId=0)
+{
+$studentId=trim((string)$studentId);
+$limit=max(1, (int)$limit);
+if($studentId==='')
+{
+return array();
+}
+
+$model=loadMlRecommendationModel();
+if(empty($model))
+{
+return array();
+}
+
+$recommendationRows=array();
+if(!empty($model['user_recommendations']) && isset($model['user_recommendations'][$studentId]) && is_array($model['user_recommendations'][$studentId]))
+{
+$recommendationRows=$model['user_recommendations'][$studentId];
+}
+
+$orderedBookIds=array();
+$scoreMap=array();
+
+if((int)$excludeBookId>0 && !empty($model['book_neighbors']) && isset($model['book_neighbors'][(string)(int)$excludeBookId]) && is_array($model['book_neighbors'][(string)(int)$excludeBookId]))
+{
+foreach($model['book_neighbors'][(string)(int)$excludeBookId] as $neighborRow)
+{
+if(!is_array($neighborRow) || !isset($neighborRow['book_id']))
+{
+continue;
+}
+$neighborBookId=(int)$neighborRow['book_id'];
+if($neighborBookId<=0 || $neighborBookId===(int)$excludeBookId || in_array($neighborBookId, $orderedBookIds, true))
+{
+continue;
+}
+$orderedBookIds[]=$neighborBookId;
+$scoreMap[$neighborBookId]=((float)(isset($neighborRow['score']) ? $neighborRow['score'] : 0.0)) * 5;
+if(count($orderedBookIds)>=$limit)
+{
+break;
+}
+}
+}
+
+foreach($recommendationRows as $recommendationRow)
+{
+if(!is_array($recommendationRow) || !isset($recommendationRow['book_id']))
+{
+continue;
+}
+$bookId=(int)$recommendationRow['book_id'];
+if($bookId<=0 || $bookId===(int)$excludeBookId || in_array($bookId, $orderedBookIds, true))
+{
+continue;
+}
+$orderedBookIds[]=$bookId;
+$scoreMap[$bookId]=isset($recommendationRow['score']) ? (float)$recommendationRow['score'] : 0.0;
+if(count($orderedBookIds)>=$limit)
+{
+break;
+}
+}
+
+if(empty($orderedBookIds))
+{
+return array();
+}
+
+$books=fetchBooksByIdsPreservingOrder($dbh, array_slice($orderedBookIds, 0, $limit), $studentId, $excludeBookId);
+foreach($books as $index => $book)
+{
+$bookId=(int)$book['bookid'];
+$books[$index]['mlRecommendationScore']=isset($scoreMap[$bookId]) ? $scoreMap[$bookId] : 0.0;
+$books[$index]['finalRecommendationScore']=max(
+isset($books[$index]['finalRecommendationScore']) ? (float)$books[$index]['finalRecommendationScore'] : 0.0,
+$books[$index]['mlRecommendationScore'] * 10
+);
+}
+
+return array_slice($books, 0, $limit);
 }
 
 function fetchContentRecommendations($dbh, $studentId, $contentText, $limit=5, $excludeBookId=0)

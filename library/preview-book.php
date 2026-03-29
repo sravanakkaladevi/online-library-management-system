@@ -27,9 +27,22 @@ header('location:listed-books.php');
 exit;
 }
 
-if(!hasBookPreview($book['PreviewLink']))
+if(!hasBookOnlineReading($book['PreviewLink']))
 {
-$_SESSION['error']="Preview link is not available for this book yet.";
+$_SESSION['error']="Online reading is not available for this book yet.";
+header('location:book-details.php?bookid=' . $bookid);
+exit;
+}
+
+if(!hasStudentPaidOnlineAccessToBook($dbh, $_SESSION['stdid'], $bookid))
+{
+if(hasStudentPendingOnlineAccessApproval($dbh, $_SESSION['stdid'], $bookid))
+{
+$_SESSION['error']="Your payment is waiting for admin approval. Online reading will open after admin marks the payment as paid.";
+}
+else {
+$_SESSION['error']="Buy this book first, then wait for admin payment approval to read it online.";
+}
 header('location:book-details.php?bookid=' . $bookid);
 exit;
 }
@@ -44,7 +57,7 @@ $previewOpenUrl=getBookPreviewOpenUrl($book['PreviewLink']);
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
     <meta name="description" content="" />
     <meta name="author" content="" />
-    <title>Online Library Management System | Preview Book</title>
+    <title>Online Library Management System | Read Book Online</title>
     <link href="assets/css/bootstrap.css" rel="stylesheet" />
     <link href="assets/css/font-awesome.css" rel="stylesheet" />
     <link href="assets/css/style.css" rel="stylesheet" />
@@ -64,7 +77,7 @@ $previewOpenUrl=getBookPreviewOpenUrl($book['PreviewLink']);
          <div class="container">
         <div class="row pad-botm">
             <div class="col-md-8">
-                <h4 class="header-line">Preview Book</h4>
+                <h4 class="header-line">Read Book Online</h4>
             </div>
             <div class="col-md-4 text-right">
                 <a href="book-details.php?bookid=<?php echo htmlentities($bookid);?>" class="btn btn-default">Back to Details</a>
@@ -76,7 +89,7 @@ $previewOpenUrl=getBookPreviewOpenUrl($book['PreviewLink']);
             <div class="col-md-12">
                 <div class="panel panel-info">
                     <div class="panel-heading">
-                        <?php echo htmlentities($book['BookName']);?> Preview
+                        <?php echo htmlentities($book['BookName']);?> Online Reading
                     </div>
                     <div class="panel-body">
                         <p><strong>Author:</strong> <?php echo htmlentities($book['AuthorName']);?></p>

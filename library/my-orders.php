@@ -172,19 +172,22 @@ exit;
                                         <th>Total Amount</th>
                                         <th>Payment</th>
                                         <th>Status</th>
+                                        <th>Online Access</th>
                                         <th>Date</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
 <?php
-$sql="SELECT tblorders.id,tblorders.OrderNumber,tblorders.TotalAmount,tblorders.PaymentProvider,tblorders.PaymentStatus,
+$sql="SELECT tblorders.id,tblorders.OrderNumber,tblorders.OrderType,tblorders.TotalAmount,tblorders.PaymentProvider,tblorders.PaymentStatus,
 tblorders.OrderStatus,tblorders.StatusNote,tblorders.CreatedDate,COALESCE(order_items.totalItems,0) AS totalItems
 FROM tblorders
 LEFT JOIN (
-SELECT OrderId,SUM(Quantity) AS totalItems
+SELECT tblorderitems.OrderId,SUM(tblorderitems.Quantity) AS totalItems,
+MAX(CASE WHEN tblbooks.PreviewLink IS NOT NULL AND TRIM(tblbooks.PreviewLink)<>'' THEN 1 ELSE 0 END) AS hasOnlineBook
 FROM tblorderitems
-GROUP BY OrderId
+INNER JOIN tblbooks ON tblbooks.id=tblorderitems.BookId
+GROUP BY tblorderitems.OrderId
 ) order_items ON order_items.OrderId=tblorders.id
 WHERE tblorders.StudentId=:sid
 ORDER BY tblorders.id DESC";
@@ -208,6 +211,28 @@ foreach($results as $result)
                                             <span class="table-order-status"><?php echo htmlentities(formatOrderStatusLabel($result->OrderStatus));?></span>
 <?php if(trim((string)$result->StatusNote)!==''){ ?>
                                             <br /><small><?php echo htmlentities($result->StatusNote);?></small>
+<?php } ?>
+                                        </td>
+                                        <td>
+<?php if($result->OrderType==='read_online' && $result->PaymentStatus==='paid' && $result->OrderStatus!=='cancelled'){ 
+$accessSql="SELECT PdfLink, ExpiryDate FROM tblreadonlineaccess WHERE OrderId=:orderId LIMIT 1";
+$accessQuery=$dbh->prepare($accessSql);
+$accessQuery->bindParam(':orderId',$result->id,PDO::PARAM_INT);
+$accessQuery->execute();
+$access=$accessQuery->fetch(PDO::FETCH_ASSOC);
+if($access && strtotime($access['ExpiryDate']) > time()){ ?>
+                                            <a href="<?php echo htmlentities($access['PdfLink']);?>" target="_blank" class="btn btn-xs btn-success">Read PDF</a>
+<?php } else { ?>
+                                            <span style="color:#777;">Expired or not available</span>
+<?php } ?>
+<?php } elseif((int)$result->hasOnlineBook===1 && $result->PaymentStatus==='paid' && $result->OrderStatus!=='cancelled'){ ?>
+                                            <span style="color:green; font-weight:600;">Unlocked</span>
+<?php } elseif((int)$result->hasOnlineBook===1 && $result->PaymentStatus==='pending_confirmation' && $result->OrderStatus!=='cancelled'){ ?>
+                                            <span style="color:#b8860b; font-weight:600;">Waiting for admin approval</span>
+<?php } elseif((int)$result->hasOnlineBook===1 && $result->PaymentStatus==='payment_rejected' && $result->OrderStatus!=='cancelled'){ ?>
+                                            <span style="color:#c9302c; font-weight:600;">Payment not approved</span>
+<?php } else { ?>
+                                            <span style="color:#777;">Not applicable</span>
 <?php } ?>
                                         </td>
                                         <td><?php echo htmlentities($result->CreatedDate);?></td>

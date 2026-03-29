@@ -61,6 +61,11 @@ $updateQuery->bindParam(':statusnote',$statusNote,PDO::PARAM_STR);
 $updateQuery->bindParam(':orderid',$orderid,PDO::PARAM_INT);
 $updateQuery->execute();
 
+if($paymentStatus==='paid')
+{
+ensureReadOnlineAccessForOrder($dbh, $orderid);
+}
+
 $_SESSION['msg']="Order and payment confirmation updated successfully.";
 header('location:update-order.php?orderid=' . $orderid);
 exit;
@@ -85,7 +90,7 @@ exit;
 }
 
 $itemSql="SELECT tblorderitems.Quantity,tblorderitems.UnitPrice,tblorderitems.LineTotal,
-tblbooks.BookName,tblbooks.ISBNNumber,tblauthors.AuthorName
+tblbooks.BookName,tblbooks.ISBNNumber,tblbooks.PreviewLink,tblauthors.AuthorName
 FROM tblorderitems
 JOIN tblbooks ON tblbooks.id=tblorderitems.BookId
 LEFT JOIN tblauthors ON tblauthors.id=tblbooks.AuthorId
@@ -95,6 +100,15 @@ $itemQuery=$dbh->prepare($itemSql);
 $itemQuery->bindParam(':orderid',$orderid,PDO::PARAM_INT);
 $itemQuery->execute();
 $items=$itemQuery->fetchAll(PDO::FETCH_OBJ);
+$hasOnlineBookInOrder=false;
+foreach($items as $item)
+{
+if(hasBookOnlineReading($item->PreviewLink))
+{
+$hasOnlineBookInOrder=true;
+break;
+}
+}
 ?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -181,11 +195,12 @@ $items=$itemQuery->fetchAll(PDO::FETCH_OBJ);
                         Update Status
                     </div>
                     <div class="panel-body">
-<?php if($order['PaymentMethod']==='counter_payment'){ ?>
+<?php if($order['PaymentMethod']==='counter_payment' || $hasOnlineBookInOrder){ ?>
                         <div class="alert alert-warning">
-                            Offline counter payment decision:
-                            set <strong>Paid</strong> if approved,
-                            or <strong>Offline Payment Not Approved</strong> if payment was not received or rejected.
+                            Payment approval decision:
+                            set <strong>Paid</strong> only after the payment is accepted.
+                            When this order contains an online book, marking it as <strong>Paid</strong> unlocks online reading for the student.
+                            Use <strong>Offline Payment Not Approved</strong> if the payment should not unlock access.
                         </div>
 <?php } ?>
                         <form method="post">
@@ -227,7 +242,7 @@ $items=$itemQuery->fetchAll(PDO::FETCH_OBJ);
 <?php } ?>
                         <div class="alert alert-info" style="margin-top:15px;">
                             Suggested flow: Placed -> Packed -> In Transit -> Out For Delivery -> Delivered -> Completed.
-                            For counter orders, set payment to Paid if approved, or Offline Payment Not Approved if the cash payment was not accepted.
+                            Online books stay locked until the payment status is set to Paid.
                         </div>
                     </div>
                 </div>
@@ -252,6 +267,7 @@ $items=$itemQuery->fetchAll(PDO::FETCH_OBJ);
                                         <th>Quantity</th>
                                         <th>Unit Price</th>
                                         <th>Line Total</th>
+                                        <th>Online Reading</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -268,6 +284,7 @@ foreach($items as $item)
                                         <td><?php echo htmlentities($item->Quantity);?></td>
                                         <td>Rs. <?php echo htmlentities(number_format((float)$item->UnitPrice,2));?></td>
                                         <td>Rs. <?php echo htmlentities(number_format((float)$item->LineTotal,2));?></td>
+                                        <td><?php echo hasBookOnlineReading($item->PreviewLink) ? 'Unlock after payment is marked Paid' : 'Not applicable'; ?></td>
                                     </tr>
 <?php
 $cnt=$cnt+1;

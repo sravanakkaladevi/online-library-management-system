@@ -73,7 +73,7 @@ header('location:manage-books.php');
                                             <th>Author</th>
                                             <th>ISBN</th>
                                             <th>Price</th>
-                                            <th>Preview</th>
+                                            <th>Online Book</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>

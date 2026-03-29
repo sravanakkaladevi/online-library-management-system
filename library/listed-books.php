@@ -69,6 +69,7 @@ exit;
 $pendingRequestBookIds=fetchStudentPendingRequestBookIds($dbh, $sid);
 $activeIssuedBookIds=fetchStudentIssuedBookIds($dbh, $sid);
 $cartBookQuantities=fetchStudentCartQuantities($dbh, $sid);
+$purchasedBookStatusMap=fetchStudentPurchasedBookStatusMap($dbh, $sid);
 $catalogFilters=getBookCatalogFiltersFromRequest();
 $catalogFilterOptions=fetchCatalogFilterOptions($dbh);
 $isRecommendedView=($catalogFilters['sort']==='recommended');
@@ -417,7 +418,7 @@ $books=fetchCatalogBooks($dbh, $catalogFilters, $sid);
             <div class="row">
                 <div class="col-md-8">
                     <h4 style="margin-top:0;">Recommended For You</h4>
-                    <p style="margin-bottom:0;">Suggestions are ranked using your recent activity, matching author or category interest, popularity, and current availability.</p>
+                    <p style="margin-bottom:0;">Suggestions are ranked using user-rating ML recommendations first, with fallback support from your recent activity, matching interests, popularity, and availability.</p>
                 </div>
                 <div class="col-md-4 text-right">
                     <span class="recommended-badge">Smart Picks</span>
@@ -489,7 +490,7 @@ $books=fetchCatalogBooks($dbh, $catalogFilters, $sid);
                     </div>
                     <div class="col-md-1 col-sm-6">
                         <div class="form-group">
-                            <label>Preview</label>
+                            <label>Online Book</label>
                             <select name="preview" class="form-control">
                                 <option value="all" <?php if($catalogFilters['preview']==='all'){ echo 'selected'; } ?>>All</option>
                                 <option value="yes" <?php if($catalogFilters['preview']==='yes'){ echo 'selected'; } ?>>Yes</option>
@@ -543,7 +544,10 @@ $alreadyIssued=isset($activeIssuedBookIds[$bookId]);
 $requestPending=isset($pendingRequestBookIds[$bookId]);
 $cartQty=isset($cartBookQuantities[$bookId]) ? (int)$cartBookQuantities[$bookId] : 0;
 $canAddToCart=$availableQty>$cartQty;
-$hasPreview=hasBookPreview($result['PreviewLink']);
+$hasOnlineReading=hasBookOnlineReading($result['PreviewLink']);
+$purchaseStatus=isset($purchasedBookStatusMap[$bookId]) ? $purchasedBookStatusMap[$bookId] : array('hasPaidAccess' => false, 'hasPendingApproval' => false, 'hasRejectedPayment' => false);
+$hasPaidOnlineAccess=$hasOnlineReading && $purchaseStatus['hasPaidAccess'];
+$hasPendingOnlineApproval=$hasOnlineReading && !$hasPaidOnlineAccess && $purchaseStatus['hasPendingApproval'];
 ?>
     <div class="col-md-4 col-sm-6 book-card-col">
         <div class="panel panel-default book-card">
@@ -589,10 +593,12 @@ $hasPreview=hasBookPreview($result['PreviewLink']);
                         <th>In Your Cart</th>
                         <td><?php echo htmlentities($cartQty);?></td>
                     </tr>
+<?php if($hasOnlineReading){ ?>
                     <tr>
-                        <th>Preview</th>
-                        <td><?php echo $hasPreview ? 'Available' : 'Not Added'; ?></td>
+                        <th>Online Reading</th>
+                        <td><?php echo $hasPaidOnlineAccess ? 'Unlocked' : ($hasPendingOnlineApproval ? 'Payment Approval Pending' : '1-Year Rent Available'); ?></td>
                     </tr>
+<?php } ?>
                     <tr>
                         <th>Issue Status</th>
                         <td>
@@ -611,10 +617,8 @@ $hasPreview=hasBookPreview($result['PreviewLink']);
             </div>
             <div class="book-actions">
                 <a href="book-details.php?bookid=<?php echo htmlentities($bookId);?>" class="btn btn-info btn-block">Open Details</a>
-<?php if($hasPreview){ ?>
-                <a href="preview-book.php?bookid=<?php echo htmlentities($bookId);?>" class="btn btn-default btn-block">Preview Book</a>
-<?php } else { ?>
-                <button type="button" class="btn btn-default btn-block" disabled>Preview Not Added</button>
+<?php if($hasPaidOnlineAccess){ ?>
+                <a href="preview-book.php?bookid=<?php echo htmlentities($bookId);?>" class="btn btn-default btn-block">Read Online</a>
 <?php } ?>
 <?php if($canAddToCart){ ?>
                 <form method="post" action="cart.php" class="cart-action-form cart-action-form-block">
@@ -644,6 +648,19 @@ $hasPreview=hasBookPreview($result['PreviewLink']);
                 </form>
 <?php } else { ?>
                 <button type="button" class="btn btn-default btn-block" disabled>Buy Now</button>
+<?php } ?>
+<?php if($availableQty>0 && !$hasPaidOnlineAccess && !$hasPendingOnlineApproval){ ?>
+                <form method="post" action="checkout.php" style="margin:0;">
+                    <input type="hidden" name="bookid" value="<?php echo htmlentities($bookId);?>">
+                    <input type="hidden" name="order_type" value="read_online">
+                    <button type="submit" name="read_online" class="btn btn-info btn-block">Rent Online (1 Year)</button>
+                </form>
+<?php } elseif($hasPaidOnlineAccess) { ?>
+                <button type="button" class="btn btn-success btn-block" disabled>Online Access Unlocked</button>
+<?php } elseif($hasPendingOnlineApproval) { ?>
+                <button type="button" class="btn btn-warning btn-block" disabled>Payment Approval Pending</button>
+<?php } else { ?>
+                <button type="button" class="btn btn-default btn-block" disabled>Read Online Unavailable</button>
 <?php } ?>
 <?php if(!$alreadyIssued && !$requestPending && $availableQty>0){ ?>
                 <form method="post" style="margin:0;">

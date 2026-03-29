@@ -21,10 +21,10 @@ $chngpwd1-> bindParam(':email', $email, PDO::PARAM_STR);
 $chngpwd1-> bindParam(':mobile', $mobile, PDO::PARAM_STR);
 $chngpwd1-> bindParam(':newpassword', $newpassword, PDO::PARAM_STR);
 $chngpwd1->execute();
-echo "<script>alert('Your Password succesfully changed');</script>";
+echo "<script>alert('Your password was changed successfully');</script>";
 }
 else {
-echo "<script>alert('Email id or Mobile no is invalid');</script>"; 
+echo "<script>alert('Email ID or mobile number is invalid');</script>"; 
 }
 }
 ?>
@@ -56,6 +56,35 @@ return false;
 return true;
 }
 </script>
+<style type="text/css">
+body {
+background:
+linear-gradient(rgba(8, 18, 28, 0.72), rgba(8, 18, 28, 0.72)),
+radial-gradient(circle at bottom right, rgba(14, 165, 233, 0.18), transparent 34%),
+url("assets/img/1.jpg") center center / cover no-repeat fixed,
+#101826;
+}
+
+.content-wrapper {
+background: transparent;
+padding-top: 30px;
+padding-bottom: 40px;
+}
+
+.panel.panel-info {
+background: rgba(255, 255, 255, 0.9);
+border: 1px solid rgba(255, 255, 255, 0.22);
+box-shadow: 0 18px 45px rgba(15, 23, 42, 0.2);
+backdrop-filter: blur(4px);
+}
+
+.panel.panel-info .panel-heading {
+background: rgba(14, 165, 233, 0.92);
+border-color: transparent;
+font-weight: 700;
+letter-spacing: 0.04em;
+}
+</style>
 
 </head>
 <body>
@@ -75,18 +104,18 @@ return true;
 <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3" >
 <div class="panel panel-info">
 <div class="panel-heading">
- LOGIN FORM
+ PASSWORD RESET
 </div>
 <div class="panel-body">
 <form role="form" name="chngpwd" method="post" onSubmit="return valid();">
 
 <div class="form-group">
-<label>Enter Reg Email id</label>
+<label>Enter Registered Email ID</label>
 <input class="form-control" type="email" name="email" required autocomplete="off" />
 </div>
 
 <div class="form-group">
-<label>Enter Reg Mobile No</label>
+<label>Enter Registered Mobile Number</label>
 <input class="form-control" type="text" name="mobile" required autocomplete="off" />
 </div>
 
@@ -96,12 +125,12 @@ return true;
 </div>
 
 <div class="form-group">
-<label>ConfirmPassword</label>
+<label>Confirm Password</label>
 <input class="form-control" type="password" name="confirmpassword" required autocomplete="off"  />
 </div>
 
 
- <button type="submit" name="change" class="btn btn-info">Chnage Password</button> | <a href="index.php">Login</a>
+ <button type="submit" name="change" class="btn btn-info">Change Password</button> | <a href="index.php">Login</a>
 </form>
  </div>
 </div>

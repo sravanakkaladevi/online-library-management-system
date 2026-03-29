@@ -31,10 +31,6 @@
             /*====================================
              WRITE YOUR   SCRIPTS  BELOW
             ======================================*/
-            if (window.location && /\/admin\//i.test(window.location.pathname)) {
-                return;
-            }
-
             if (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) {
                 return;
             }

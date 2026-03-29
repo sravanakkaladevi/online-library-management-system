@@ -23,6 +23,216 @@ header('location:' . $path);
 exit;
 }
 
+if(isset($_POST['read_online']))
+{
+$bookid=intval($_POST['bookid']);
+$orderType='read_online';
+if($bookid<=0)
+{
+$_SESSION['error']="Invalid book selected.";
+redirectToCheckout('listed-books.php');
+}
+
+$book=fetchBookWithInventory($dbh, $bookid);
+if(!$book)
+{
+$_SESSION['error']="Book not found.";
+redirectToCheckout('listed-books.php');
+}
+
+// For read_online, assume a fixed price, say 50% of book price or fixed amount. Let's use a fixed rental price, say Rs. 100 for 1 year.
+$rentalPrice=100.00; // Fixed price for read online
+
+// Check if already has access
+if(hasStudentPaidOnlineAccessToBook($dbh, $sid, $bookid))
+{
+$_SESSION['error']="You already have online access to this book.";
+redirectToCheckout('listed-books.php');
+}
+
+// Create order directly
+try {
+$dbh->beginTransaction();
+
+$studentSql="SELECT Status FROM tblstudents WHERE StudentID=:sid FOR UPDATE";
+$studentQuery=$dbh->prepare($studentSql);
+$studentQuery->bindParam(':sid',$sid,PDO::PARAM_STR);
+$studentQuery->execute();
+$student=$studentQuery->fetch(PDO::FETCH_ASSOC);
+if(!$student || (int)$student['Status']!==1)
+{
+throw new Exception("Your account is not active.");
+}
+
+$orderNumber='ORD-' . time() . '-' . $sid;
+$paymentMethod='card_payment'; // Default for read_online
+$paymentProvider=$paymentMethods[$paymentMethod]['provider'];
+
+$orderSql="INSERT INTO tblorders (OrderNumber, OrderType, StudentId, TotalAmount, PaymentMethod, PaymentProvider, PaymentStatus, OrderStatus)
+VALUES (:orderNumber, :orderType, :sid, :totalAmount, :paymentMethod, :paymentProvider, 'pending_confirmation', 'placed')";
+$orderQuery=$dbh->prepare($orderSql);
+$orderQuery->bindParam(':orderNumber',$orderNumber,PDO::PARAM_STR);
+$orderQuery->bindParam(':orderType',$orderType,PDO::PARAM_STR);
+$orderQuery->bindParam(':sid',$sid,PDO::PARAM_STR);
+$orderQuery->bindParam(':totalAmount',$rentalPrice,PDO::PARAM_STR);
+$orderQuery->bindParam(':paymentMethod',$paymentMethod,PDO::PARAM_STR);
+$orderQuery->bindParam(':paymentProvider',$paymentProvider,PDO::PARAM_STR);
+$orderQuery->execute();
+$orderId=$dbh->lastInsertId();
+
+$itemSql="INSERT INTO tblorderitems (OrderId, BookId, Quantity, UnitPrice, LineTotal)
+VALUES (:orderId, :bookId, 1, :unitPrice, :lineTotal)";
+$itemQuery=$dbh->prepare($itemSql);
+$itemQuery->bindParam(':orderId',$orderId,PDO::PARAM_INT);
+$itemQuery->bindParam(':bookId',$bookid,PDO::PARAM_INT);
+$itemQuery->bindParam(':unitPrice',$rentalPrice,PDO::PARAM_STR);
+$itemQuery->bindParam(':lineTotal',$rentalPrice,PDO::PARAM_STR);
+$itemQuery->execute();
+
+$dbh->commit();
+$_SESSION['msg']="1-year online rent order placed successfully. Proceed to demo payment.";
+header('location:checkout.php?orderid=' . $orderId);
+exit;
+} catch(Exception $e) {
+$dbh->rollBack();
+$_SESSION['error']="Failed to place order: " . $e->getMessage();
+redirectToCheckout('listed-books.php');
+}
+}
+
+$orderId=isset($_GET['orderid']) ? intval($_GET['orderid']) : 0;
+$checkoutItems=array();
+$totalAmount=0;
+$orderType='buy';
+if($orderId>0)
+{
+$orderSql="SELECT OrderType, PaymentStatus, OrderStatus FROM tblorders WHERE id=:orderId AND StudentId=:sid LIMIT 1";
+$orderQuery=$dbh->prepare($orderSql);
+$orderQuery->bindParam(':orderId',$orderId,PDO::PARAM_INT);
+$orderQuery->bindParam(':sid',$sid,PDO::PARAM_STR);
+$orderQuery->execute();
+$order=$orderQuery->fetch(PDO::FETCH_ASSOC);
+if(!$order)
+{
+$_SESSION['error']="Order not found.";
+redirectToCheckout('listed-books.php');
+}
+$orderType=$order['OrderType'];
+if($order['PaymentStatus']==='paid' && $order['OrderStatus']==='completed')
+{
+$_SESSION['msg']="Order already completed.";
+redirectToCheckout('my-orders.php');
+}
+
+$itemSql="SELECT tblorderitems.Quantity,tblorderitems.UnitPrice,tblorderitems.LineTotal,tblbooks.BookName,tblbooks.ISBNNumber
+FROM tblorderitems
+JOIN tblbooks ON tblbooks.id=tblorderitems.BookId
+WHERE tblorderitems.OrderId=:orderId
+ORDER BY tblorderitems.id ASC";
+$itemQuery=$dbh->prepare($itemSql);
+$itemQuery->bindParam(':orderId',$orderId,PDO::PARAM_INT);
+$itemQuery->execute();
+$checkoutItems=$itemQuery->fetchAll(PDO::FETCH_OBJ);
+foreach($checkoutItems as $item)
+{
+$totalAmount+=(float)$item->LineTotal;
+}
+}
+else
+{
+// Existing cart logic
+$cartSql="SELECT BookId,Quantity FROM tblcart WHERE StudentId=:sid FOR UPDATE";
+$cartQuery=$dbh->prepare($cartSql);
+$cartQuery->bindParam(':sid',$sid,PDO::PARAM_STR);
+$cartQuery->execute();
+$cartRows=$cartQuery->fetchAll(PDO::FETCH_ASSOC);
+if(empty($cartRows))
+{
+$_SESSION['error']="Your cart is empty.";
+redirectToCheckout('cart.php');
+}
+
+$bookIds=array();
+$cartMap=array();
+foreach($cartRows as $cartRow)
+{
+$bookIds[]=(int)$cartRow['BookId'];
+$cartMap[(int)$cartRow['BookId']]=(int)$cartRow['Quantity'];
+}
+
+$placeholders=implode(',', array_fill(0, count($bookIds), '?'));
+
+$bookSql="SELECT id,BookName,BookPrice,bookQty FROM tblbooks WHERE id IN (" . $placeholders . ") FOR UPDATE";
+$bookQuery=$dbh->prepare($bookSql);
+$bookQuery->execute($bookIds);
+$bookRows=$bookQuery->fetchAll(PDO::FETCH_ASSOC);
+if(count($bookRows)!==count($bookIds))
+{
+$_SESSION['error']="One or more books in your cart are no longer available.";
+redirectToCheckout('cart.php');
+}
+
+$issueSql="SELECT BookId,SUM(CASE WHEN RetrunStatus IS NULL OR RetrunStatus='' OR RetrunStatus=0 THEN 1 ELSE 0 END) AS activeIssues
+FROM tblissuedbookdetails
+WHERE BookId IN (" . $placeholders . ")
+GROUP BY BookId";
+$issueQuery=$dbh->prepare($issueSql);
+$issueQuery->execute($bookIds);
+$issueRows=$issueQuery->fetchAll(PDO::FETCH_ASSOC);
+$issueMap=array();
+foreach($issueRows as $issueRow)
+{
+$issueMap[(int)$issueRow['BookId']]=(int)$issueRow['activeIssues'];
+}
+
+$soldSql="SELECT tblorderitems.BookId,SUM(tblorderitems.Quantity) AS soldQty
+FROM tblorderitems
+INNER JOIN tblorders ON tblorders.id=tblorderitems.OrderId
+WHERE tblorders.PaymentStatus='paid' AND tblorders.OrderStatus<>'cancelled'
+AND tblorderitems.BookId IN (" . $placeholders . ")
+GROUP BY tblorderitems.BookId";
+$soldQuery=$dbh->prepare($soldSql);
+$soldQuery->execute($bookIds);
+$soldRows=$soldQuery->fetchAll(PDO::FETCH_ASSOC);
+$soldMap=array();
+foreach($soldRows as $soldRow)
+{
+$soldMap[(int)$soldRow['BookId']]=(int)$soldRow['soldQty'];
+}
+
+$validatedItems=array();
+foreach($bookRows as $bookRow)
+{
+$bookId=(int)$bookRow['id'];
+$quantity=isset($cartMap[$bookId]) ? (int)$cartMap[$bookId] : 0;
+$activeIssues=isset($issueMap[$bookId]) ? (int)$issueMap[$bookId] : 0;
+$soldQty=isset($soldMap[$bookId]) ? (int)$soldMap[$bookId] : 0;
+$availableQty=calculateAvailableBookQty($bookRow['bookQty'], $activeIssues, $soldQty);
+if($quantity<=0)
+{
+throw new Exception("Invalid quantity found in your cart.");
+}
+if($quantity>$availableQty)
+{
+throw new Exception("Only " . $availableQty . " copies are available right now for " . $bookRow['BookName'] . ".");
+}
+
+$unitPrice=(float)$bookRow['BookPrice'];
+$lineTotal=$unitPrice*$quantity;
+$totalAmount+=$lineTotal;
+
+$validatedItems[]=array(
+'BookId'=>$bookId,
+'BookName'=>$bookRow['BookName'],
+'ISBNNumber'=>$bookRow['ISBNNumber'],
+'Quantity'=>$quantity,
+'UnitPrice'=>$unitPrice,
+'LineTotal'=>$lineTotal
+);
+}
+$checkoutItems=$validatedItems;
+}
+
 if(isset($_POST['place_order']))
 {
 $paymentMethod=isset($_POST['payment_method']) ? trim($_POST['payment_method']) : 'card_payment';
@@ -31,8 +241,41 @@ if(!isset($paymentMethods[$paymentMethod]))
 $paymentMethod='card_payment';
 }
 
+$orderIdFromPost=isset($_POST['orderid']) ? intval($_POST['orderid']) : 0;
+$orderTypeFromPost=isset($_POST['order_type']) ? trim($_POST['order_type']) : 'buy';
+
 try {
 $dbh->beginTransaction();
+
+if($orderIdFromPost>0)
+{
+$orderVerifySql="SELECT id,StudentId,PaymentStatus,OrderStatus,OrderType FROM tblorders WHERE id=:orderId FOR UPDATE";
+$orderVerifyQuery=$dbh->prepare($orderVerifySql);
+$orderVerifyQuery->bindParam(':orderId',$orderIdFromPost,PDO::PARAM_INT);
+$orderVerifyQuery->execute();
+$orderVerify=$orderVerifyQuery->fetch(PDO::FETCH_ASSOC);
+if(!$orderVerify || $orderVerify['StudentId']!==$sid)
+{
+throw new Exception("Invalid order for checkout.");
+}
+if($orderVerify['OrderStatus']==='cancelled')
+{
+throw new Exception("Cancelled orders cannot be processed.");
+}
+
+// keep pending confirmation until admin approves (update-order handles paid->online access)
+$updateOrderSql="UPDATE tblorders SET PaymentMethod=:paymentMethod, PaymentProvider=:paymentProvider, PaymentStatus='pending_confirmation' WHERE id=:orderId";
+$updateOrderQuery=$dbh->prepare($updateOrderSql);
+$updateOrderQuery->bindParam(':paymentMethod',$paymentMethod,PDO::PARAM_STR);
+$updateOrderQuery->bindParam(':paymentProvider',$paymentMethods[$paymentMethod]['provider'],PDO::PARAM_STR);
+$updateOrderQuery->bindParam(':orderId',$orderIdFromPost,PDO::PARAM_INT);
+$updateOrderQuery->execute();
+
+$dbh->commit();
+$_SESSION['msg']="Payment submitted, pending admin confirmation. Online preview will unlock after admin confirms payment.";
+header('location:order-details.php?orderid=' . $orderIdFromPost);
+exit;
+}
 
 $studentSql="SELECT Status FROM tblstudents WHERE StudentId=:sid FOR UPDATE";
 $studentQuery=$dbh->prepare($studentSql);
@@ -135,7 +378,7 @@ array(
 $orderNumber=generateOrderNumber();
 $transactionId=generateTransactionId();
 $provider=$paymentMethods[$paymentMethod]['provider'];
-$paymentStatus=$paymentMethod==='counter_payment' ? 'pending_confirmation' : 'paid';
+$paymentStatus='pending_confirmation';
 $orderStatus='placed';
 $insertOrderSql="INSERT INTO tblorders(OrderNumber,StudentId,TotalAmount,PaymentMethod,PaymentProvider,PaymentStatus,OrderStatus,TransactionId)
 VALUES(:ordernumber,:sid,:totalamount,:paymentmethod,:provider,:paymentstatus,:orderstatus,:transactionid)";
@@ -171,10 +414,10 @@ $clearQuery->execute();
 $dbh->commit();
 if($paymentMethod==='counter_payment')
 {
-$_SESSION['msg']="Order placed successfully. Pay at the library counter and wait for admin confirmation. Order number: " . $orderNumber;
+$_SESSION['msg']="Order placed successfully. Pay at the library counter and wait for admin payment approval before online reading opens. Order number: " . $orderNumber;
 }
 else {
-$_SESSION['msg']="Order placed successfully. Card payment was confirmed instantly. Order number: " . $orderNumber;
+$_SESSION['msg']="Order placed successfully. Payment was recorded and is waiting for admin approval. Online reading will open after admin marks the payment as paid. Order number: " . $orderNumber;
 }
 redirectToCheckout('order-details.php?orderid=' . $orderId);
 }
@@ -193,6 +436,20 @@ $cartItems=fetchCartItems($dbh, $sid);
 $grandTotal=0;
 $totalItems=0;
 $hasAvailabilityIssue=false;
+
+// Use existing checkoutItems if read-online or existing order
+if($orderId>0 && !empty($checkoutItems))
+{
+foreach($checkoutItems as $item)
+{
+$grandTotal+=(float)$item->LineTotal;
+$totalItems+=(int)$item->Quantity;
+}
+$cartItems=$checkoutItems;
+}
+else
+{
+// Cart mode: use fetchCartItems for buy orders
 foreach($cartItems as $cartItem)
 {
 $grandTotal+=$cartItem['lineTotal'];
@@ -200,6 +457,7 @@ $totalItems+=(int)$cartItem['Quantity'];
 if((int)$cartItem['Quantity']>(int)$cartItem['availableQty'])
 {
 $hasAvailabilityIssue=true;
+}
 }
 }
 ?>
@@ -738,19 +996,27 @@ $hasAvailabilityIssue=true;
 $cnt=1;
 foreach($cartItems as $cartItem)
 {
+// Handle both arrays (from fetchCartItems) and objects (from tblorderitems)
+$bookName=is_object($cartItem) ? $cartItem->BookName : $cartItem['BookName'];
+$authorName=is_object($cartItem) ? (isset($cartItem->AuthorName) ? $cartItem->AuthorName : 'N/A') : $cartItem['AuthorName'];
+$isbn=is_object($cartItem) ? $cartItem->ISBNNumber : $cartItem['ISBNNumber'];
+$quantity=is_object($cartItem) ? $cartItem->Quantity : $cartItem['Quantity'];
+$unitPrice=is_object($cartItem) ? $cartItem->UnitPrice : $cartItem['BookPrice'];
+$lineTotal=is_object($cartItem) ? $cartItem->LineTotal : $cartItem['lineTotal'];
+$availableQty=is_object($cartItem) ? 999 : (isset($cartItem['availableQty']) ? $cartItem['availableQty'] : 999);
 ?>
                                     <tr>
                                         <td><?php echo htmlentities($cnt);?></td>
                                         <td>
-                                            <?php echo htmlentities($cartItem['BookName']);?><br />
-                                            <small><?php echo htmlentities($cartItem['AuthorName']);?> | ISBN: <?php echo htmlentities($cartItem['ISBNNumber']);?></small>
-<?php if((int)$cartItem['Quantity']>(int)$cartItem['availableQty']){ ?>
-                                            <br /><span style="color:red;">Only <?php echo htmlentities($cartItem['availableQty']);?> available now</span>
+                                            <?php echo htmlentities($bookName);?><br />
+                                            <small><?php echo htmlentities($authorName);?><?php if($isbn){ echo ' | ISBN: ' . htmlentities($isbn); } ?></small>
+<?php if((int)$quantity>(int)$availableQty){ ?>
+                                            <br /><span style="color:red;">Only <?php echo htmlentities($availableQty);?> available now</span>
 <?php } ?>
                                         </td>
-                                        <td><?php echo htmlentities($cartItem['Quantity']);?></td>
-                                        <td>Rs. <?php echo htmlentities(number_format((float)$cartItem['BookPrice'],2));?></td>
-                                        <td>Rs. <?php echo htmlentities(number_format((float)$cartItem['lineTotal'],2));?></td>
+                                        <td><?php echo htmlentities($quantity);?></td>
+                                        <td>Rs. <?php echo htmlentities(number_format((float)$unitPrice,2));?></td>
+                                        <td>Rs. <?php echo htmlentities(number_format((float)$lineTotal,2));?></td>
                                     </tr>
 <?php
 $cnt=$cnt+1;
@@ -768,7 +1034,7 @@ $cnt=$cnt+1;
                         <div class="checkout-payment-top">
                             <div>
                                 <h4>Choose Payment</h4>
-                                <p>Select card for instant payment or pay at counter for admin confirmation.</p>
+                                <p>Pay now, then wait for admin to approve the payment before online reading is unlocked.</p>
                             </div>
                             <span class="checkout-payment-pill">2 Options</span>
                         </div>
@@ -784,6 +1050,10 @@ $cnt=$cnt+1;
                                 <i class="fa fa-money" style="font-size:20px;"></i>
                             </button>
                         </div>
+<?php if($orderId>0){ ?>
+                        <input type="hidden" name="orderid" value="<?php echo htmlentities($orderId); ?>" />
+                        <input type="hidden" name="order_type" value="<?php echo htmlentities($orderType); ?>" />
+<?php } ?>
                         <input type="hidden" name="payment_method" id="selectedPaymentMethod" value="card_payment" />
 
                         <div class="payment-section payment-section-card is-active" id="paymentSectionCard">
@@ -809,7 +1079,7 @@ $cnt=$cnt+1;
                                     </div>
                                 </div>
                             </div>
-                            <p class="card-instructions">Card payment marks the order as paid immediately and order processing can continue without admin payment confirmation.</p>
+                            <p class="card-instructions">Card payment submits the payment details now, but online reading stays locked until admin verifies and marks the order as paid.</p>
                         </div>
 
                         <div class="payment-section payment-section-counter" id="paymentSectionCounter">
@@ -833,9 +1103,9 @@ $cnt=$cnt+1;
                             </div>
                         </div>
                         <p class="counter-waiting-note">Waiting for admin approval after offline payment at counter.</p>
-                        <p class="counter-instructions">Payment status will remain pending until the admin confirms that the amount was collected at the counter.</p>
+                        <p class="counter-instructions">Payment status will remain pending until the admin confirms that the amount was collected at the counter. After approval, the online book will open from your order details and book pages.</p>
                         </div>
-                        <p class="demo-payment-note">Card Payment -> order direct Paid. Pay at Counter -> admin confirmation needed.</p>
+                        <p class="demo-payment-note">Card Payment -> payment submitted, admin approval still needed. Pay at Counter -> admin approval needed after cash collection. Online reading opens only after admin marks the payment as Paid.</p>
 <?php if($hasAvailabilityIssue){ ?>
                         <div class="alert alert-warning" style="margin-bottom:0;">
                             Update the cart first because one or more quantities exceed the current available stock.

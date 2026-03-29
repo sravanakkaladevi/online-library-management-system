@@ -42,6 +42,7 @@
                                 <ul class="dropdown-menu" role="menu" aria-labelledby="ddlmenuItem">
                                     <li role="presentation"><a role="menuitem" tabindex="-1" href="add-book.php"><i class="fa fa-plus-square nav-icon"></i>Add Book</a></li>
                                      <li role="presentation"><a role="menuitem" tabindex="-1" href="manage-books.php"><i class="fa fa-clone nav-icon"></i>Manage Books</a></li>
+                                     <li role="presentation"><a role="menuitem" tabindex="-1" href="manage-reviews.php"><i class="fa fa-star nav-icon"></i>Manage Reviews</a></li>
                                 </ul>
                             </li>
 
@@ -58,6 +59,7 @@
                                 <a href="#" class="dropdown-toggle" id="ddlmenuItem" data-toggle="dropdown"><i class="fa fa-shopping-bag nav-icon"></i> Orders <i class="fa fa-angle-down"></i></a>
                                 <ul class="dropdown-menu" role="menu" aria-labelledby="ddlmenuItem">
                                     <li role="presentation"><a role="menuitem" tabindex="-1" href="manage-orders.php"><i class="fa fa-tasks nav-icon"></i>Manage Orders</a></li>
+                                    <li role="presentation"><a role="menuitem" tabindex="-1" href="manage-online-requests.php"><i class="fa fa-desktop nav-icon"></i>Online Rent Requests</a></li>
                                 </ul>
                             </li>
                              <li><a href="reg-students.php"><i class="fa fa-users nav-icon"></i>Reg Students</a></li>

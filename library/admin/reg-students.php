@@ -163,6 +163,7 @@ exit;
                                         <th>Email id</th>
                                         <th>Mobile Number</th>
                                         <th>Reg Date</th>
+                                        <th>Password Updated</th>
                                         <th>Status</th>
                                         <th>Action</th>
                                     </tr>
@@ -186,6 +187,7 @@ foreach($results as $result)
                                         <td class="center"><?php echo htmlentities($result->EmailId);?></td>
                                         <td class="center"><?php echo htmlentities($result->MobileNumber);?></td>
                                         <td class="center"><?php echo htmlentities($result->RegDate);?></td>
+                                        <td class="center"><?php echo !empty($result->UpdationDate) ? htmlentities($result->UpdationDate) : 'Not changed'; ?></td>
                                         <td class="center"><?php echo $result->Status==1 ? 'Active' : 'Blocked'; ?></td>
                                         <td class="center">
 <?php if($result->Status==1){ ?>

@@ -65,7 +65,7 @@ exit;
 }
 
 $itemSql="SELECT tblorderitems.Quantity,tblorderitems.UnitPrice,tblorderitems.LineTotal,
-tblbooks.id AS BookId,tblbooks.BookName,tblbooks.ISBNNumber,tblauthors.AuthorName
+tblbooks.id AS BookId,tblbooks.BookName,tblbooks.ISBNNumber,tblbooks.PreviewLink,tblauthors.AuthorName
 FROM tblorderitems
 INNER JOIN tblbooks ON tblbooks.id=tblorderitems.BookId
 LEFT JOIN tblauthors ON tblauthors.id=tblbooks.AuthorId
@@ -75,9 +75,15 @@ $itemQuery=$dbh->prepare($itemSql);
 $itemQuery->bindParam(':orderid',$orderid,PDO::PARAM_INT);
 $itemQuery->execute();
 $items=$itemQuery->fetchAll(PDO::FETCH_OBJ);
+foreach($items as $index => $item)
+{
+$items[$index]->hasOnlineReading=hasBookOnlineReading($item->PreviewLink);
+$items[$index]->hasPaidOnlineAccess=$items[$index]->hasOnlineReading && $order['PaymentStatus']==='paid' && $order['OrderStatus']!=='cancelled';
+$items[$index]->hasPendingOnlineApproval=$items[$index]->hasOnlineReading && !$items[$index]->hasPaidOnlineAccess && $order['PaymentStatus']==='pending_confirmation' && $order['OrderStatus']!=='cancelled';
+}
 
 $recommendedBooks=array();
-if($order['OrderStatus']==='delivered')
+if(in_array($order['OrderStatus'], array('delivered','completed'), true))
 {
 $recommendedBooks=fetchRecommendedBooks($dbh, $sid, 4);
 foreach($items as $index => $item)
@@ -391,6 +397,19 @@ $items[$index]->studentReview=fetchStudentBookReview($dbh, $sid, $item->BookId);
 <?php if(trim((string)$order['StatusNote'])!==''){ ?>
                         <p><strong>Order Note:</strong> <?php echo htmlentities($order['StatusNote']);?></p>
 <?php } ?>
+<?php if($order['PaymentStatus']==='pending_confirmation'){ ?>
+                        <div class="alert alert-warning" style="margin-top:15px; margin-bottom:0;">
+                            Payment is waiting for admin approval. Online books from this order will unlock after admin marks the payment as paid.
+                        </div>
+<?php } elseif($order['PaymentStatus']==='paid'){ ?>
+                        <div class="alert alert-success" style="margin-top:15px; margin-bottom:0;">
+                            Payment approved. Any online books in this order are ready to open now.
+                        </div>
+<?php } elseif($order['PaymentStatus']==='payment_rejected'){ ?>
+                        <div class="alert alert-danger" style="margin-top:15px; margin-bottom:0;">
+                            Payment was not approved by admin yet, so online reading is still locked for this order.
+                        </div>
+<?php } ?>
 <?php if(in_array($order['OrderStatus'], array('in_transit','out_for_delivery'), true)){ ?>
                         <div class="delivery-tracker-card">
                             <h4><?php echo $order['OrderStatus']==='in_transit' ? 'Your order is in transit' : 'Your order is out for delivery'; ?></h4>
@@ -466,6 +485,7 @@ $items[$index]->studentReview=fetchStudentBookReview($dbh, $sid, $item->BookId);
                                         <th>Quantity</th>
                                         <th>Unit Price</th>
                                         <th>Line Total</th>
+                                        <th>Online Reading</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -482,6 +502,17 @@ foreach($items as $item)
                                         <td><?php echo htmlentities($item->Quantity);?></td>
                                         <td>Rs. <?php echo htmlentities(number_format((float)$item->UnitPrice,2));?></td>
                                         <td>Rs. <?php echo htmlentities(number_format((float)$item->LineTotal,2));?></td>
+                                        <td>
+<?php if($item->hasPaidOnlineAccess){ ?>
+                                            <a href="preview-book.php?bookid=<?php echo htmlentities($item->BookId);?>" class="btn btn-xs btn-success">Read Online</a>
+<?php } elseif($item->hasPendingOnlineApproval){ ?>
+                                            <span style="color:#b8860b; font-weight:600;">Waiting for admin approval</span>
+<?php } elseif($item->hasOnlineReading){ ?>
+                                            <span style="color:#777;">Locked until payment approval</span>
+<?php } else { ?>
+                                            <span style="color:#777;">Not available</span>
+<?php } ?>
+                                        </td>
                                     </tr>
 <?php
 $cnt=$cnt+1;

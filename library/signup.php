@@ -30,7 +30,7 @@ $query->execute();
 $lastInsertId = $dbh->lastInsertId();
 if($lastInsertId)
 {
-echo '<script>alert("Your Registration successfull and your student id is  "+"'.$StudentId.'")</script>';
+echo '<script>alert("Your registration was successful and your student ID is '.$StudentId.'")</script>';
 }
 else 
 {
@@ -86,6 +86,35 @@ error:function (){}
 });
 }
 </script>    
+<style type="text/css">
+body {
+background:
+linear-gradient(rgba(7, 15, 27, 0.72), rgba(7, 15, 27, 0.72)),
+radial-gradient(circle at top left, rgba(37, 99, 235, 0.18), transparent 34%),
+url("assets/img/2.jpg") center center / cover no-repeat fixed,
+#101826;
+}
+
+.content-wrapper {
+background: transparent;
+padding-top: 30px;
+padding-bottom: 40px;
+}
+
+.panel.panel-danger {
+background: rgba(255, 255, 255, 0.9);
+border: 1px solid rgba(255, 255, 255, 0.2);
+box-shadow: 0 18px 45px rgba(15, 23, 42, 0.2);
+backdrop-filter: blur(4px);
+}
+
+.panel.panel-danger .panel-heading {
+background: rgba(220, 53, 69, 0.92);
+border-color: transparent;
+font-weight: 700;
+letter-spacing: 0.04em;
+}
+</style>
 
 </head>
 <body>
@@ -106,7 +135,7 @@ error:function (){}
 <div class="col-md-9 col-md-offset-1">
                <div class="panel panel-danger">
                         <div class="panel-heading">
-                           SINGUP FORM
+                           SIGNUP FORM
                         </div>
                         <div class="panel-body">
                             <form name="signup" method="post" onSubmit="return valid();">

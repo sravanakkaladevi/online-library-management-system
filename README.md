@@ -19,29 +19,77 @@ A PHP, MySQL, and Python-based library platform for:
 
 ## Screenshots
 
-### User Book List
+### User Dashboard
 
-![User Book List](library/screenshots/book-list.png)
+Main user landing page after login. It gives quick access to books, orders, issued books, profile details, and other user actions.
 
-### Book Details
+![User Dashboard](library/screenshots/user-dashboard.png)
 
-![Book Details](library/screenshots/book-details.png)
+### Book List
 
-### Cart Page
+Shows the available library books for users to browse, search, view details, and start rental or request actions.
 
-![Cart Page](library/screenshots/cart-page.png)
+![Books](library/screenshots/user-book-list.png)
+
+### Rent Book
+
+Book rental screen where a user can review the selected book and continue with the rent or online access process.
+
+![Rent](library/screenshots/rent-book.png)
+
+### Payment Page
+
+Payment step for the online book rental flow. The user can confirm payment details before submitting the request.
+
+![Payment](library/screenshots/payment-page.png)
+
+### Order History
+
+Lists the user's previous and current book orders with order status information for tracking.
+
+![Orders](library/screenshots/order-history.png)
 
 ### Issued Books
 
+Displays books issued to the user, including issue and return-related information.
+
 ![Issued Books](library/screenshots/issued-books.png)
 
-### User Account Menu
+### User Profile
 
-![User Account Menu](library/screenshots/user-account-option.png)
+User account page for viewing and managing profile details.
+
+![Profile](library/screenshots/user-profile.png)
 
 ### Admin Dashboard
 
+Admin home screen with shortcuts and summary cards for managing the library system.
+
 ![Admin Dashboard](library/screenshots/admin-dashboard.png)
+
+### Admin Login
+
+Admin authentication page used to enter the protected management panel.
+
+![Login](library/screenshots/admin-login.png)
+
+### Manage Orders
+
+Admin order management page for reviewing user orders, checking order details, and updating order status.
+
+![Orders](library/screenshots/manage-orders.png)
+
+### Book Requests
+
+Admin page for reviewing counter issue requests submitted by users and taking approval actions.
+
+![Requests](library/screenshots/book-requests.png)
+
+### Online Requests
+
+Admin page for managing online rental or reading access requests after user payment submission.
+
+![Online](library/screenshots/online-requests.png)
 
 ## Project Structure
 

@@ -8,8 +8,6 @@ A PHP, MySQL, and Python-based library platform for:
 - admin approval flows
 - user ratings, reviews, and ML-assisted recommendations
 
-This README is text-only. Screenshots and images can be added later.
-
 ## Main Features
 
 - User login, signup, profile, cart, checkout, and order tracking
@@ -18,6 +16,32 @@ This README is text-only. Screenshots and images can be added later.
 - Online 1-year rent request approval from admin
 - Ratings and reviews with recommendation support
 - Python training pipeline that exports ML recommendations for PHP to use
+
+## Screenshots
+
+### User Book List
+
+![User Book List](library/screenshots/book-list.png)
+
+### Book Details
+
+![Book Details](library/screenshots/book-details.png)
+
+### Cart Page
+
+![Cart Page](library/screenshots/cart-page.png)
+
+### Issued Books
+
+![Issued Books](library/screenshots/issued-books.png)
+
+### User Account Menu
+
+![User Account Menu](library/screenshots/user-account-option.png)
+
+### Admin Dashboard
+
+![Admin Dashboard](library/screenshots/admin-dashboard.png)
 
 ## Project Structure
 
@@ -29,6 +53,7 @@ Online-Library-Management-System-PHP/
 |   |-- data/
 |   |-- database/
 |   |-- includes/
+|   |-- screenshots/
 |   |-- export_recommendation_data.php
 |   |-- index.php
 |   `-- adminlogin.php

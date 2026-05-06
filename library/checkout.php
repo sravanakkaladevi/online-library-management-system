@@ -14,6 +14,10 @@ exit;
 $sid=$_SESSION['stdid'];
 $paymentMethods=array(
 'card_payment'=>array('label'=>'Card Payment','provider'=>'Card Gateway'),
+'google_pay'=>array('label'=>'Google Pay','provider'=>'Google Pay'),
+'apple_pay'=>array('label'=>'Apple Pay','provider'=>'Apple Pay'),
+'paypal'=>array('label'=>'PayPal','provider'=>'PayPal'),
+'upi'=>array('label'=>'UPI','provider'=>'UPI'),
 'counter_payment'=>array('label'=>'Pay at Library Counter','provider'=>'Library Counter'),
 );
 
@@ -922,6 +926,110 @@ $hasAvailabilityIssue=true;
                 width: 100%;
             }
         }
+
+        .payment--options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            align-items: stretch;
+        }
+
+        .payment-method-radio {
+            cursor: pointer;
+            flex: 1;
+            min-width: 60px;
+            max-width: 80px;
+        }
+
+        .payment-method-radio input[type="radio"] {
+            display: none;
+        }
+
+        .payment-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: 8px 4px;
+            background: #f2f2f2;
+            border-radius: 11px;
+            border: 2px solid transparent;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+        }
+
+        .payment-method-radio input[type="radio"]:checked + .payment-card {
+            background: #111827;
+            border-color: #374151;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .payment-method-radio input[type="radio"]:checked + .payment-card .payment-icon-wrapper,
+        .payment-method-radio input[type="radio"]:checked + .payment-card .payment-label {
+            color: #ffffff;
+        }
+
+        .payment-icon-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+            margin-bottom: 2px;
+        }
+
+        .payment-label {
+            font-size: 9px;
+            font-weight: 700;
+            color: #333;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .payment-method-radio:hover .payment-card {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .payment-method-radio input[type="radio"]:checked + .payment-card .payment-icon-wrapper svg path,
+        .payment-method-radio input[type="radio"]:checked + .payment-card .payment-icon-wrapper i {
+            filter: brightness(0) invert(1);
+        }
+
+        .payment-section-upi {
+            display: none;
+        }
+
+        .payment-section-upi.is-active {
+            display: block;
+        }
+
+        @media (max-width: 767px) {
+            .payment--options {
+                grid-template-columns: 1fr;
+                width: 100%;
+                padding: 0;
+            }
+
+            .payment-method-radio {
+                min-width: auto;
+                max-width: none;
+            }
+
+            .split {
+                grid-template-columns: 1fr;
+            }
+
+            .counter-transaction-card {
+                flex-direction: column;
+            }
+
+            .counter-transaction-left,
+            .counter-transaction-right {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1043,12 +1151,73 @@ $cnt=$cnt+1;
                             <p><strong>Grand Total:</strong> Rs. <?php echo htmlentities(number_format((float)$grandTotal,2));?></p>
                         </div>
                         <div class="payment--options">
-                            <button type="button" class="payment-method-btn is-selected" data-method="card_payment" title="Card Payment">
-                                <i class="fa fa-credit-card" style="font-size:20px;"></i>
-                            </button>
-                            <button type="button" class="payment-method-btn" data-method="counter_payment" title="Pay at Library Counter">
-                                <i class="fa fa-money" style="font-size:20px;"></i>
-                            </button>
+                            <label class="payment-method-radio">
+                                <input type="radio" name="payment_method_radio" value="card_payment" checked>
+                                <div class="payment-card">
+                                    <div class="payment-icon-wrapper">
+                                        <i class="fa fa-credit-card" style="font-size:18px;"></i>
+                                    </div>
+                                    <span class="payment-label">Card</span>
+                                </div>
+                            </label>
+                            <label class="payment-method-radio">
+                                <input type="radio" name="payment_method_radio" value="google_pay">
+                                <div class="payment-card">
+                                    <div class="payment-icon-wrapper">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="18" height="18">
+                                            <path fill="#4285F4" d="M24 9.5c3.3 0 6.3 1.3 8.5 3.5l6.2-6.2C31.8 3.5 28.1 2 24 2 13.7 2 5.6 9.2 2.6 19.2l7.4 5.8c1.8-5.1 6.2-8.8 11.6-8.8z"/>
+                                            <path fill="#34A853" d="M45.5 24.5c0-1.6-.2-3.2-.5-4.7H24v9h12.7c-.5 2.8-2.1 5.2-4.5 6.8l7.4 5.8c4.3-4 6.8-9.9 6.8-16.6z"/>
+                                            <path fill="#FBBC05" d="M10.2 28.3c-1-2.8-1-6.1 0-8.9l-7.4-5.8c-3.4 6.8-3.4 14.9 0 21.7l7.4-5.8z"/>
+                                            <path fill="#EA4335" d="M24 46c5.3 0 9.8-1.7 13.1-4.6l-7.4-5.8c-1.8 1.2-4.1 1.9-6.6 1.9-5.2 0-9.6-3.5-11.2-8.3l-7.4 11.3C5.6 38.8 13.7 46 24 46z"/>
+                                        </svg>
+                                    </div>
+                                    <span class="payment-label">GPay</span>
+                                </div>
+                            </label>
+                            <label class="payment-method-radio">
+                                <input type="radio" name="payment_method_radio" value="apple_pay">
+                                <div class="payment-card">
+                                    <div class="payment-icon-wrapper">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="18" height="18">
+                                            <path fill="#000" d="M34.6 13.4h-2.5v-2c0-1.1-.5-1.9-1.7-1.9h-4.7c-1.2 0-1.7.8-1.7 1.9v2h-2.5c-1.1 0-1.9.9-1.9 1.9v2c0 1 .8 1.9 1.9 1.9h2.5v2c0 1.1.5 1.9 1.7 1.9h4.7c1.2 0 1.7-.8 1.7-1.9v-2h2.5c1.1 0 1.9-.9 1.9-1.9v-2c0-1-.8-1.9-1.9-1.9zm-7.7 5.1c-.4-.3-1-.5-1.9-.5-1.7 0-3 1.3-3 3s1.3 3 3 3 3-1.3 3-3-1.3-3-3-3c-.9 0-1.5.2-1.9.5zm5.6 0c-.4-.3-1-.5-1.9-.5-1.7 0-3 1.3-3 3s1.3 3 3 3 3-1.3 3-3-1.3-3-3-3c-.9 0-1.5.2-1.9.5z"/>
+                                        </svg>
+                                    </div>
+                                    <span class="payment-label">Apple</span>
+                                </div>
+                            </label>
+                            <label class="payment-method-radio">
+                                <input type="radio" name="payment_method_radio" value="paypal">
+                                <div class="payment-card">
+                                    <div class="payment-icon-wrapper">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="18" height="18">
+                                            <circle fill="#003087" cx="24" cy="24" r="22"/>
+                                            <path fill="#fff" d="M24 15l-2.3 7.5h-2.4l2.7-7.5zm-2.6 9.6c-1.4 0-2.4-1-2.6-2.3l1.8-5.8c.2.6.8 1.1 1.9 1.1 1.2 0 2-.8 2-2 0-1.2-.8-2-2-2-.9 0-1.4.3-2.1.9l-1.6-2.2c.5-.5 1.2-.7 2-.7 1.7 0 2.9 1.4 2.9 3.1 0 2.1-1.7 3.5-3.9 3.5H17l2 6.4h2.4z"/>
+                                        </svg>
+                                    </div>
+                                    <span class="payment-label">PayPal</span>
+                                </div>
+                            </label>
+                            <label class="payment-method-radio">
+                                <input type="radio" name="payment_method_radio" value="upi">
+                                <div class="payment-card">
+                                    <div class="payment-icon-wrapper">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="18" height="18">
+                                            <rect fill="#4CAF50" width="48" height="48" rx="8"/>
+                                            <path fill="#fff" d="M26 22l6-12h-4l-4 8-4-8h-4l6 12z"/>
+                                        </svg>
+                                    </div>
+                                    <span class="payment-label">UPI</span>
+                                </div>
+                            </label>
+                            <label class="payment-method-radio">
+                                <input type="radio" name="payment_method_radio" value="counter_payment">
+                                <div class="payment-card">
+                                    <div class="payment-icon-wrapper">
+                                        <i class="fa fa-money" style="font-size:18px;"></i>
+                                    </div>
+                                    <span class="payment-label">Counter</span>
+                                </div>
+                            </label>
                         </div>
 <?php if($orderId>0){ ?>
                         <input type="hidden" name="orderid" value="<?php echo htmlentities($orderId); ?>" />
@@ -1105,7 +1274,30 @@ $cnt=$cnt+1;
                         <p class="counter-waiting-note">Waiting for admin approval after offline payment at counter.</p>
                         <p class="counter-instructions">Payment status will remain pending until the admin confirms that the amount was collected at the counter. After approval, the online book will open from your order details and book pages.</p>
                         </div>
-                        <p class="demo-payment-note">Card Payment -> payment submitted, admin approval still needed. Pay at Counter -> admin approval needed after cash collection. Online reading opens only after admin marks the payment as Paid.</p>
+
+                        <div class="payment-section payment-section-upi" id="paymentSectionUPI">
+                            <div class="separator">
+                                <hr class="line" />
+                                <p>UPI / QR PAYMENT</p>
+                                <hr class="line" />
+                            </div>
+                            <div class="checkout-payment-upi">
+                                <div class="upi-qr-container" style="text-align:center;padding:20px;">
+                                    <div style="width:200px;height:200px;background:#f0f0f0;margin:0 auto 15px;display:flex;align-items:center;justify-content:center;border-radius:10px;">
+                                        <img src="assets/img/upi-qr.png" alt="UPI QR Code" style="max-width:100%;max-height:100%;border-radius:10px;" onerror="this.style.display='none';this.parentElement.innerHTML='<span style='color:#888'>QR Code</span>';" />
+                                    </div>
+                                    <p style="font-size:13px;color:#555;margin:10px 0;">Scan QR with any UPI app (GPay, PhonePe, Paytm, etc.)</p>
+                                    <div class="upi-id-box" style="background:#f4f4f4;padding:10px 15px;border-radius:8px;margin:10px 0;cursor:pointer;user-select:all;" onclick="navigator.clipboard.writeText('library@upi')">
+                                        <strong>UPI ID:</strong> <code>library@upi</code>
+                                        <br><small style="color:#888;">Click to copy</small>
+                                    </div>
+                                    <p class="upi-instructions" style="font-size:12px;color:#666;line-height:1.6;margin-top:15px;padding:10px;background:#f8fafc;border-radius:8px;">
+                                        After payment, your payment will be marked pending. Admin will verify your transaction and approve your order. Online access will unlock after admin approval.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="demo-payment-note">Card Payment -> payment submitted, admin approval still needed. Pay at Counter -> admin approval needed after cash collection. UPI -> payment via QR, admin verifies before approval. Online reading opens only after admin marks the payment as Paid.</p>
 <?php if($hasAvailabilityIssue){ ?>
                         <div class="alert alert-warning" style="margin-bottom:0;">
                             Update the cart first because one or more quantities exceed the current available stock.
@@ -1127,42 +1319,42 @@ $cnt=$cnt+1;
     <script src="assets/js/custom.js"></script>
     <script type="text/javascript">
     (function () {
-        var buttons=document.getElementsByClassName('payment-method-btn');
+        var radios=document.querySelectorAll('input[name="payment_method_radio"]');
         var paymentInput=document.getElementById('selectedPaymentMethod');
         var cardSection=document.getElementById('paymentSectionCard');
         var counterSection=document.getElementById('paymentSectionCounter');
-        var i=0;
+        var upiSection=document.getElementById('paymentSectionUPI');
 
         if(!paymentInput){
             return;
         }
 
         function setSelected(method) {
-            for(i=0;i<buttons.length;i++){
-                if(buttons[i].getAttribute('data-method')===method){
-                    buttons[i].className='payment-method-btn is-selected';
-                } else {
-                    buttons[i].className='payment-method-btn';
+            radios.forEach(function(radio) {
+                if(radio.value === method) {
+                    radio.checked = true;
                 }
-            }
-
-            paymentInput.value=method;
+            });
+            paymentInput.value = method;
 
             if(cardSection){
-                cardSection.className='payment-section payment-section-card' + (method==='card_payment' ? ' is-active' : '');
+                cardSection.style.display = method === 'card_payment' ? 'block' : 'none';
             }
-
             if(counterSection){
-                counterSection.className='payment-section payment-section-counter' + (method==='counter_payment' ? ' is-active' : '');
+                counterSection.style.display = method === 'counter_payment' ? 'block' : 'none';
+            }
+            if(upiSection){
+                upiSection.style.display = method === 'upi' ? 'block' : 'none';
             }
         }
 
-        for(i=0;i<buttons.length;i++){
-            buttons[i].onclick=function () {
-                setSelected(this.getAttribute('data-method'));
-            };
-        }
+        radios.forEach(function(radio) {
+            radio.addEventListener('change', function() {
+                setSelected(this.value);
+            });
+        });
 
+        // Initialize based on current paymentInput value
         setSelected(paymentInput.value);
     })();
     </script>
